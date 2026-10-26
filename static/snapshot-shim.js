@@ -4,13 +4,16 @@
 (() => {
   const BASE = location.href.replace(/[#?].*$/, "").replace(/\/[^/]*$/, "");
   const BASE_PATH = new URL(BASE).pathname.replace(/\/$/, "");
+  // Build stamp from this script's ?v=, added to data requests so browsers don't mix in cached old snapshots.
+  const V = new URL(document.currentScript.src).searchParams.get("v") || "";
+  const versioned = (u) => (V ? `${u}${u.includes("?") ? "&" : "?"}v=${V}` : u);
   window.RCF = { api: BASE, snapshot: true };
   const realFetch = window.fetch.bind(window);
   const json = (data, status = 200) =>
     new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
   const slug = (...parts) => parts.join(" ").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const file = async (path, missing = "Not included in this snapshot.") => {
-    const r = await realFetch(`${BASE}/${path}`);
+    const r = await realFetch(versioned(`${BASE}/${path}`));
     return r.ok ? r : json({ error: missing }, 404);
   };
 
@@ -32,7 +35,7 @@
       const n = parseInt(q.get("extra"), 10);
       if (!r.ok || !(n > 0)) return r;
       const d = await r.json();
-      const w = await realFetch(`${BASE}/api/budget-whatif/${d.car_id}.json`);
+      const w = await realFetch(versioned(`${BASE}/api/budget-whatif/${d.car_id}.json`));
       if (w.ok) for (const [i, col] of (await w.json())[n] || []) d.columns.splice(i, 0, col);
       return json(d);
     }
@@ -41,7 +44,7 @@
       return file(`api/vin/${decodeURIComponent(p.slice(9)).trim().toUpperCase()}.json`,
         "This snapshot only has VIN details for the cars on the shortlist.");
     }
-    if (/^\/api\/cars\/\d+\/(plan|report)\//.test(p)) return realFetch(`${BASE}${p}`); // PDFs; settings are baked in
+    if (/^\/api\/cars\/\d+\/(plan|report)\//.test(p)) return realFetch(versioned(`${BASE}${p}`)); // PDFs; settings are baked in
     return json({ error: "Not included in this snapshot." }, 404);
   };
 
