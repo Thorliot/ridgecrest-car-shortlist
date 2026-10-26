@@ -1,0 +1,51 @@
+{
+  "name": "Ridgecrest Car Finder (snapshot)",
+  "short_name": "Car Finder",
+  "description": "Find, vet, and budget a car in Ridgecrest, CA \u2014 shortlist, reliability, DoorDash profit, and Car Plan PDFs.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5eadb",
+  "theme_color": "#2b2350",
+  "icons": [
+    {
+      "src": "./static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./static/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Shortlist",
+      "url": "./#shortlist",
+      "icons": [
+        {
+          "src": "./static/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Budget",
+      "url": "./#budget",
+      "icons": [
+        {
+          "src": "./static/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

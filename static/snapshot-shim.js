@@ -7,7 +7,15 @@
   // Build stamp from this script's ?v=, added to data requests so browsers don't mix in cached old snapshots.
   const V = new URL(document.currentScript.src).searchParams.get("v") || "";
   const versioned = (u) => (V ? `${u}${u.includes("?") ? "&" : "?"}v=${V}` : u);
-  window.RCF = { api: BASE, snapshot: true };
+  // The snapshot's own service worker (tools/snapshot-sw.js) makes it installable and usable offline.
+  window.RCF = { api: BASE, snapshot: true, sw: `${BASE}/sw.js`, swScope: `${BASE_PATH}/` };
+  // A new snapshot starts with an empty offline copy, so let the app's automatic save run again.
+  try {
+    if (localStorage.getItem("snapshotVersion") !== V) {
+      localStorage.removeItem("savedOfflineAt");
+      localStorage.setItem("snapshotVersion", V);
+    }
+  } catch {}
   const realFetch = window.fetch.bind(window);
   const json = (data, status = 200) =>
     new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
@@ -16,6 +24,14 @@
     const r = await realFetch(versioned(`${BASE}/${path}`));
     return r.ok ? r : json({ error: missing }, 404);
   };
+
+  // Playing an episode saves the whole file for offline (see snapshot-sw.js). On a first visit the player can
+  // start before the service worker controls the page, so ask through fetch(), which always goes via the worker.
+  document.addEventListener("play", (e) => {
+    if (e.target.tagName === "AUDIO" && navigator.serviceWorker?.controller) {
+      realFetch(e.target.currentSrc, { headers: { Range: "bytes=0-1" } }).catch(() => {});
+    }
+  }, true);
 
   window.fetch = async (input, init = {}) => {
     const url = new URL(typeof input === "string" ? input : input.url, location.href);
@@ -50,9 +66,4 @@
     return json({ error: "Not included in this snapshot." }, 404);
   };
 
-  // No offline mode for the snapshot: GitHub Pages serves it, and saving would cache someone else's copy.
-  if (navigator.serviceWorker) {
-    navigator.serviceWorker.register = () => Promise.reject(new Error("Snapshot: service worker disabled"));
-    try { Object.defineProperty(navigator.serviceWorker, "ready", { value: new Promise(() => {}) }); } catch {}
-  }
 })();

@@ -1439,7 +1439,7 @@ if (!navigator.onLine) setOffline(true);
 // Standalone app: /sw.js. WordPress: the plugin passes its own service worker URL.
 const SW_URL = CFG.sw || (CFG.embedded ? null : "/sw.js");
 if ("serviceWorker" in navigator && SW_URL) {
-  navigator.serviceWorker.register(SW_URL, { scope: "/" }).catch((e) => console.warn("Service worker not registered:", e));
+  navigator.serviceWorker.register(SW_URL, { scope: CFG.swScope || "/" }).catch((e) => console.warn("Service worker not registered:", e));
 }
 
 // Offline needs a service worker, which browsers only allow on secure pages (https, or localhost).
