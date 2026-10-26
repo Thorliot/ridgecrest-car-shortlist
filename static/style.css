@@ -203,6 +203,9 @@ main hr, .rcf-app hr {
 @media (max-width: 439.98px) {
   .app-header .nav-tabs > .nav-item > .nav-link > .fa-solid { display: none; }
 }
+@media (max-width: 359.98px) {
+  .app-header .nav-link { padding: .45rem .4rem; font-size: .86rem; }
+}
 /* Scene colors: dusk in light mode, a starry night in dark mode */
 .scene-sky-top { stop-color: #2b2350; } .scene-sky-mid { stop-color: #7a3b5e; } .scene-sky-low { stop-color: #d0603a; } .scene-sky-horizon { stop-color: #f3b257; }
 .scene-far { fill: #8f4f63; } .scene-mid { fill: #9b3f2a; } .scene-near { fill: #4f2717; } .scene-ground { fill: #3d2318; }

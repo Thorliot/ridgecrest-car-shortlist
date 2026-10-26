@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&display=swap" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="static/style.css?v=20261026134552">
+  <link rel="stylesheet" href="static/style.css?v=20261026145452">
   <style>
     /* Read-only snapshot: hide the controls that change data (the offline/install bar stays). */
     #edit-lock, #add-car, #car-delete, #plan-save, #photo-files, label:has(> #photo-files), #photo-url-add,
@@ -99,7 +99,7 @@
       </li>
       <li class="nav-item dropdown" data-group="money">
         <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa-solid fa-wallet me-1"></i>Money</button>
-        <ul class="dropdown-menu">
+        <ul class="dropdown-menu dropdown-menu-end">
           <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-budget" data-tab="budget" type="button"><i class="fa-solid fa-wallet fa-fw me-2"></i>Budget</button></li>
           <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-cost" data-tab="cost" type="button"><i class="fa-solid fa-calculator fa-fw me-2"></i>Cost Calculator</button></li>
           <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-plan" data-tab="plan" type="button"><i class="fa-solid fa-file-lines fa-fw me-2"></i>Car Plan</button></li>
@@ -107,7 +107,7 @@
       </li>
       <li class="nav-item dropdown" data-group="fundraise">
         <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa-solid fa-hand-holding-heart me-1"></i>Fundraise</button>
-        <ul class="dropdown-menu">
+        <ul class="dropdown-menu dropdown-menu-end">
           <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-gofundme" data-tab="gofundme" type="button"><i class="fa-solid fa-hand-holding-heart fa-fw me-2"></i>GoFundMe</button></li>
           <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-marketing" data-tab="marketing" type="button"><i class="fa-solid fa-bullhorn fa-fw me-2"></i>Marketing</button></li>
           <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-notebook" data-tab="notebook" type="button"><i class="fa-solid fa-podcast fa-fw me-2"></i>Notebook</button></li>
@@ -137,7 +137,7 @@
       <div class="card-header d-flex flex-wrap align-items-center gap-2">
         <h3 class="h5 mb-0 me-auto"><i class="fa-solid fa-money-bill-wave me-2 text-primary"></i>What car payment I can safely afford</h3>
         <label class="small text-body-secondary" for="home-car">Figured for</label>
-        <select id="home-car" class="form-select form-select-sm w-auto"></select>
+        <select id="home-car" class="form-select form-select-sm w-auto mw-100"></select>
       </div>
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -267,9 +267,9 @@
   <section id="tab-shortlist" class="tab-pane fade" role="tabpanel">
     <div class="d-flex flex-wrap gap-2 mb-3">
       <button id="add-car" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i>Add a car</button>
-      <select id="filter-status" class="form-select w-auto" aria-label="Filter by status"><option value="available" selected>Available only</option><option value="">All statuses</option></select>
-      <select id="filter-source" class="form-select w-auto"><option value="">All sources</option></select>
-      <select id="sort-by" class="form-select w-auto">
+      <select id="filter-status" class="form-select w-auto mw-100" aria-label="Filter by status"><option value="available" selected>Available only</option><option value="">All statuses</option></select>
+      <select id="filter-source" class="form-select w-auto mw-100"><option value="">All sources</option></select>
+      <select id="sort-by" class="form-select w-auto mw-100">
         <option value="updated">Recently updated</option><option value="price">Price (low → high)</option>
         <option value="mileage">Mileage (low → high)</option><option value="year">Year (new → old)</option><option value="rating">My rating</option><option value="dash">DoorDash profit (best first)</option><option value="mpg">Gas mileage (best first)</option>
       </select>
@@ -398,7 +398,7 @@
         <div class="card shadow-sm">
           <div class="card-header fw-semibold d-flex flex-wrap gap-2 align-items-center"><i class="fa-solid fa-receipt me-1 text-primary"></i>
             <span class="me-auto">The math for one car</span>
-            <select id="gfm-car" class="form-select form-select-sm w-auto" aria-label="Car"></select></div>
+            <select id="gfm-car" class="form-select form-select-sm w-auto mw-100" aria-label="Car"></select></div>
           <div class="card-body" id="gfm-detail"></div>
         </div>
       </div>
@@ -740,7 +740,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="static/snapshot-shim.js?v=20261026134552"></script>
-<script src="static/app.js?v=20261026134552"></script>
+<script src="static/snapshot-shim.js?v=20261026145452"></script>
+<script src="static/app.js?v=20261026145452"></script>
 </body>
 </html>

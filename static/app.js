@@ -37,6 +37,14 @@ function confirmBox(text) {
 $$("#tabs [data-bs-toggle=tab]").forEach((b) =>
   b.addEventListener("shown.bs.tab", () => { try { localStorage.setItem("tab", b.dataset.tab); } catch {} })
 );
+// Bootstrap opens a page's menu when it switches tabs (e.g. reopening to your last page) but only a click
+// closes it again; close it so a menu is never left hanging open over the page.
+$$("#tabs .dropdown-item[data-bs-toggle=tab]").forEach((b) =>
+  b.addEventListener("shown.bs.tab", () => {
+    const toggle = b.closest(".dropdown")?.querySelector('[data-bs-toggle="dropdown"]');
+    if (toggle) bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
+  })
+);
 function showTab(name) {
   const btn = $(`#tabs [data-tab="${name}"]`);
   if (btn) return bootstrap.Tab.getOrCreateInstance(btn).show();
@@ -1398,7 +1406,7 @@ async function renderNotebook() {
           <h3 class="h6 mb-1"><span class="badge text-bg-primary me-2">${i + 1}</span>${esc(ep.title)}</h3>
           <div class="small text-body-secondary">${esc(ep.summary || "")}${ep.seconds ? ` · ${clock(ep.seconds)}` : ""} · ${fileSize(ep.bytes)}</div>
         </div>
-        <select class="form-select form-select-sm w-auto" data-nb-speed="${i}" aria-label="Playback speed">
+        <select class="form-select form-select-sm w-auto mw-100" data-nb-speed="${i}" aria-label="Playback speed">
           ${[1, 1.25, 1.5, 1.75, 2].map((r) => `<option value="${r}">${r}×</option>`).join("")}</select>
         <a class="btn btn-sm btn-outline-primary" href="${nbUrl(ep.file, true)}" download="${esc(ep.file)}"><i class="fa-solid fa-download me-1"></i>Download</a>
       </div>
