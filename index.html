@@ -3,24 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ridgecrest Car Shortlist</title>
-  <meta name="description" content="Read-only snapshot of the used cars on the Ridgecrest Car Finder shortlist.">
+  <title>Ridgecrest Car Finder (snapshot)</title>
   <meta name="theme-color" content="#2b2350">
-  <script>document.documentElement.dataset.bsTheme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";</script>
+  <meta name="description" content="Find, vet, and budget a car in Ridgecrest, CA.">
+    <link rel="icon" href="static/icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="static/icons/apple-touch-icon.png">
+  <script>
+    // Follow the OS light/dark setting (Bootstrap 5.3 color modes).
+    document.documentElement.dataset.bsTheme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&display=swap" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="static/style.css">
   <style>
-    .app-header .container-xl { padding-bottom: 3.5rem; }
-    .car-photo img { object-fit: cover; }
-    #photo-carousel .carousel-item img { width: 100%; height: calc(100vh - 140px); object-fit: contain; }
+    /* Read-only snapshot: hide the controls that change data or install the app. */
+    #pwa-bar, #add-car, #car-delete, #plan-save, #photo-files, label:has(> #photo-files), #photo-url-add,
+    #car-form button[type=submit] { display: none !important; }
   </style>
 </head>
 <body class="bg-body-tertiary app-body">
+
 <header class="app-header text-white mb-4">
+  <!-- Dusk on the open road: sky, sun, distant mesas, canyon walls, Joshua trees and the highway -->
   <svg class="app-header-scene" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="scene-sky" x1="0" y1="0" x2="0" y2="1">
@@ -65,6 +72,7 @@
   </svg>
   <div class="container-xl pt-3">
     <div class="d-flex align-items-center gap-3">
+      <!-- US Route 395, the highway through Ridgecrest -->
       <svg class="route-shield" viewBox="0 0 48 48" role="img" aria-label="US Route 395 shield">
         <path d="M24 3.5c5.6 3 11.6 3 17 .4 3.4 6.2 3.6 13.6.2 19.2 4 7.4 1.4 18.2-17.2 21.4C5.4 41.3 2.8 30.5 6.8 23.1 3.4 17.5 3.6 10.1 7 3.9c5.4 2.6 11.4 2.6 17-.4Z"
               fill="#fffaf3" stroke="#1b1410" stroke-width="2.5" stroke-linejoin="round"/>
@@ -72,132 +80,539 @@
         <text x="24" y="32.5" text-anchor="middle" font-family="Overpass, Arial, sans-serif" font-weight="800" font-size="15" letter-spacing="-.5" fill="#1b1410">395</text>
       </svg>
       <div>
-        <h1 class="h3 mb-0 brand-title">Ridgecrest Car Shortlist</h1>
-        <p class="mb-0 brand-sub">Used cars under consideration · snapshot as of October 26, 2026</p>
+        <h1 class="h3 mb-0 brand-title">Ridgecrest Car Finder</h1>
+        <p class="mb-0 brand-sub">Find, vet, and buy a car for the road · Ridgecrest, CA 93555</p>
       </div>
     </div>
+    <ul class="nav nav-tabs border-0 mt-3 flex-nowrap overflow-x-auto" id="tabs" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-home" data-tab="home" type="button"><i class="fa-solid fa-house me-1"></i>Home</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-search" data-tab="search" type="button"><i class="fa-solid fa-magnifying-glass me-1"></i>Search</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-shortlist" data-tab="shortlist" type="button"><i class="fa-solid fa-clipboard-list me-1"></i>Shortlist <span id="shortlist-count" class="badge rounded-pill text-bg-secondary">0</span></button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-budget" data-tab="budget" type="button"><i class="fa-solid fa-wallet me-1"></i>Budget</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-vin" data-tab="vin" type="button"><i class="fa-solid fa-barcode me-1"></i>VIN &amp; Recalls</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cost" data-tab="cost" type="button"><i class="fa-solid fa-calculator me-1"></i>Cost Calculator</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-plan" data-tab="plan" type="button"><i class="fa-solid fa-file-lines me-1"></i>Car Plan</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-guide" data-tab="guide" type="button"><i class="fa-solid fa-book-open me-1"></i>Buying Guide</button></li>
+    </ul>
   </div>
 </header>
 
-<main class="container-xl">
-  <div class="alert alert-info d-flex gap-2 align-items-start">
-    <i class="fa-solid fa-circle-info mt-1"></i>
-    <div>A read-only snapshot of the shortlist from the Ridgecrest Car Finder app. Prices and availability were
-      checked on October 26, 2026; listings change daily, so confirm with the seller before driving out.</div>
-  </div>
-  <div class="d-flex flex-wrap gap-2 mb-3">
-    <select id="f-status" class="form-select w-auto" aria-label="Show">
-      <option value="active">Still in the running</option><option value="">All cars</option>
-      <option value="sold">Sold to someone else</option><option value="passed">Passed on</option>
-    </select>
-    <select id="f-sort" class="form-select w-auto" aria-label="Sort">
-      <option value="price">Price: low to high</option><option value="mpg">Best gas mileage</option>
-      <option value="rel">Most reliable</option><option value="miles">Fewest miles</option>
-    </select>
-    <span class="ms-auto align-self-center text-body-secondary small" id="count"></span>
-  </div>
-  <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3" id="cars"></div>
-</main>
+<main class="container-xl pb-5 tab-content">
+  <div class="alert alert-info d-flex gap-2 align-items-start"><i class="fa-solid fa-camera-retro mt-1"></i><div><b>Read-only snapshot of October 26, 2026.</b> This is a copy of the Ridgecrest Car Finder app as it stood that day. Listings change daily, so confirm with the seller before driving out. Editing is turned off.</div></div>
 
-<div class="modal fade" id="photo-modal" tabindex="-1" aria-label="Photos" aria-hidden="true">
-  <div class="modal-dialog modal-fullscreen"><div class="modal-content bg-dark">
-    <div class="modal-header border-0"><h2 class="modal-title fs-6 text-white" id="photo-title"></h2>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button></div>
-    <div class="modal-body p-0 d-flex align-items-center">
-      <div id="photo-carousel" class="carousel slide w-100">
-        <div class="carousel-inner"></div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#photo-carousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span><span class="visually-hidden">Previous</span></button>
-        <button class="carousel-control-next" type="button" data-bs-target="#photo-carousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span><span class="visually-hidden">Next</span></button>
+  <!-- HOME: car options overview for the talk with Dad (numbers are live) -->
+  <section id="tab-home" class="tab-pane fade show active" role="tabpanel">
+    <div class="p-4 mb-4 bg-body rounded-3 shadow-sm">
+      <h2 class="display-6 fw-semibold mb-1">Getting a Reliable Car: Options</h2>
+      <p class="text-body-secondary mb-3" id="home-sub">For our talk, Dad | Ridgecrest, CA | DoorDash, Platinum Dasher</p>
+      <p class="lead mb-0">Thanks for wanting to help me get some reliable wheels. I put together where I stand right now, what I can afford, and a few ways we could do this, so we can talk through whatever works best for you.</p>
+    </div>
+
+    <h3 class="h5 mb-3"><i class="fa-solid fa-map-pin me-2 text-primary"></i>Where I am right now <small class="text-body-secondary fw-normal">— my most recent week</small></h3>
+    <div class="row row-cols-1 row-cols-sm-3 g-3 mb-3" id="home-stats"></div>
+    <div class="alert alert-warning d-flex gap-2" id="home-slow"></div>
+    <p>My pay per delivery is solid. What I need is more deliveries per week, and a reliable car keeps me on the road to get them.</p>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex flex-wrap align-items-center gap-2">
+        <h3 class="h5 mb-0 me-auto"><i class="fa-solid fa-money-bill-wave me-2 text-primary"></i>What car payment I can safely afford</h3>
+        <label class="small text-body-secondary" for="home-car">Figured for</label>
+        <select id="home-car" class="form-select form-select-sm w-auto"></select>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light"><tr><th>Deliveries per week</th><th>Left each month before a car payment</th><th>Safe monthly car payment</th></tr></thead>
+          <tbody id="home-afford"></tbody>
+        </table>
+      </div>
+      <div class="card-body">
+        <div class="form-text mb-3" id="home-assume"></div>
+        <div class="alert alert-primary mb-0" id="home-bottom"></div>
       </div>
     </div>
-  </div></div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header"><h3 class="h5 mb-0"><i class="fa-solid fa-tags me-2 text-primary"></i>What "reliable" costs</h3></div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light"><tr><th>Budget</th><th>What it typically buys</th><th>Life as a delivery car</th></tr></thead>
+          <tbody>
+            <tr><td class="fw-semibold">$2,000 to $4,000</td><td>2000s Civic or Corolla, 180,000+ miles</td><td><span class="badge text-bg-danger">1 to 2 years</span> real repair risk</td></tr>
+            <tr><td class="fw-semibold">$8,000 to $11,000</td><td>2015 to 2018 Fit, Corolla or Prius, around 100,000 miles</td><td><span class="badge text-bg-warning">3 to 5 years</span></td></tr>
+            <tr><td class="fw-semibold">$13,000 to $16,000</td><td>2018 to 2021 Corolla, Civic or Prius, 50,000 to 80,000 miles</td><td><span class="badge text-bg-success">5+ years</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card-body"><p class="mb-0">The best long-term value for delivery work is usually a <b>Prius or Corolla in the $9,000 to $13,000 range</b>: reliable, cheap on gas and easy to resell.</p></div>
+    </div>
+
+    <div class="d-flex align-items-center mb-3">
+      <h3 class="h5 mb-0 me-auto"><i class="fa-solid fa-car-side me-2 text-primary"></i>Cars I'm looking at</h3>
+      <button class="btn btn-sm btn-outline-primary" data-goto="shortlist">See full shortlist <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4" id="home-cars"></div>
+
+    <h3 class="h5 mb-1"><i class="fa-solid fa-signs-post me-2 text-primary"></i>Ways we could do this</h3>
+    <p class="text-body-secondary small">From least to most help from you</p>
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered align-middle bg-body small">
+        <thead class="table-light"><tr><th>Option</th><th>What you'd do</th><th>My monthly payment to you</th><th class="text-success">Good</th><th class="text-danger">Watch out</th></tr></thead>
+        <tbody id="home-ways"></tbody>
+      </table>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header fw-semibold"><i class="fa-solid fa-thumbs-up me-2 text-primary"></i>Other ways to help besides the car itself</div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Paying for a mechanic's inspection before we buy (about $100 to $150).</li>
+            <li class="list-group-item">Covering insurance for the first few months while my deliveries recover.</li>
+            <li class="list-group-item">Starting a repair fund so one breakdown doesn't take me off the road.</li>
+            <li class="list-group-item">Putting the car on your insurance, if your insurer allows it, with me paying you back.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header fw-semibold"><i class="fa-solid fa-square-check me-2 text-primary"></i>My commitments to you</div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Get a mechanic's inspection before buying anything.</li>
+            <li class="list-group-item">Keep the car insured, maintained and registered.</li>
+            <li class="list-group-item">Avoid another late-pickup violation: when the app offers to let me wait it out or pass the rest of a delivery without hurting my completion rate, I'll use it.</li>
+            <li class="list-group-item">Track my deliveries and miles and share them with you.</li>
+            <li class="list-group-item">Save a repair fund every week.</li>
+            <li class="list-group-item">Tell you right away if I'm going to have trouble making a payment.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4 border-primary-subtle">
+      <div class="card-body">
+        <h3 class="h5"><i class="fa-solid fa-arrow-trend-up me-2 text-primary"></i>A payment that grows with my income</h3>
+        <p class="mb-0" id="home-stepup"></p>
+      </div>
+    </div>
+
+    <div class="alert alert-success d-flex gap-2 align-items-start">
+      <i class="fa-solid fa-heart mt-1"></i>
+      <div>Whatever you decide, thank you. I've also put together a detailed plan and a simple written agreement if we decide to go with a repayment option — the <b>Car Plan</b> button on each car opens it.</div>
+    </div>
+    <div class="form-text" id="home-foot"></div>
+  </section>
+
+  <!-- SEARCH -->
+  <section id="tab-search" class="tab-pane fade" role="tabpanel">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5 card-title">What are you looking for?</h2>
+        <form id="search-form" class="row g-3 align-items-end">
+          <div class="col-6 col-md-3"><label class="form-label">Make</label><input class="form-control" name="make" placeholder="any make" list="makes"></div>
+          <div class="col-6 col-md-3"><label class="form-label">Model</label><input class="form-control" name="model" placeholder="any model"></div>
+          <div class="col-6 col-md-2"><label class="form-label">Min year</label><input class="form-control" name="minYear" type="number" min="1980" max="2027" placeholder="any"></div>
+          <div class="col-6 col-md-2"><label class="form-label">Max price ($)</label><input class="form-control" name="maxPrice" type="number" step="500" placeholder="no limit"></div>
+          <div class="col-6 col-md-2"><label class="form-label">Max miles</label><input class="form-control" name="maxMiles" type="number" step="5000" placeholder="no limit"></div>
+          <div class="col-6 col-md-2"><label class="form-label">Radius (mi)</label>
+            <select class="form-select" name="radius"><option>25</option><option>50</option><option selected>100</option><option>150</option><option>200</option><option>300</option></select></div>
+          <div class="col-6 col-md-2"><label class="form-label">Condition</label>
+            <select class="form-select" name="condition"><option value="used" selected>Used</option><option value="new">New</option><option value="all">Any</option></select></div>
+          <div class="col-12 col-md-8 d-flex gap-2">
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass me-1"></i>Build searches</button>
+            <button type="button" id="search-clear" class="btn btn-outline-secondary">Clear</button>
+          </div>
+        </form>
+        <datalist id="makes">
+          <option>Toyota</option><option>Ford</option><option>Chevrolet</option><option>Honda</option><option>Nissan</option><option>Jeep</option>
+          <option>Ram</option><option>GMC</option><option>Subaru</option><option>Hyundai</option><option>Kia</option><option>Mazda</option>
+          <option>Tesla</option><option>Dodge</option><option>Lexus</option><option>Volkswagen</option>
+        </datalist>
+        <div class="form-text mt-3">Ridgecrest is small, so most inventory is in Bakersfield, Lancaster/Palmdale, and Victorville (all 1.5–2 hrs away). A 100–150 mi radius is a good start.</div>
+      </div>
+    </div>
+
+    <div id="search-summary" class="alert alert-primary"></div>
+    <div id="search-results" class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4"></div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 card-title">Dealers in &amp; near Ridgecrest</h2>
+        <p class="text-body-secondary small">Verify hours and inventory before driving — listings change.</p>
+        <div id="dealers" class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-2"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHORTLIST -->
+  <section id="tab-shortlist" class="tab-pane fade" role="tabpanel">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <button id="add-car" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i>Add a car</button>
+      <select id="filter-status" class="form-select w-auto"><option value="">All statuses</option></select>
+      <select id="filter-source" class="form-select w-auto"><option value="">All sources</option></select>
+      <select id="sort-by" class="form-select w-auto">
+        <option value="updated">Recently updated</option><option value="price">Price (low → high)</option>
+        <option value="mileage">Mileage (low → high)</option><option value="year">Year (new → old)</option><option value="rating">My rating</option><option value="dash">DoorDash profit (best first)</option><option value="mpg">Gas mileage (best first)</option>
+      </select>
+      <button id="compare-btn" class="btn btn-outline-secondary"><i class="fa-solid fa-table-columns me-1"></i>Compare selected</button>
+    </div>
+    <div id="car-list" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3"></div>
+    <div id="compare" class="card shadow-sm mt-4 d-none"></div>
+  </section>
+
+  <!-- BUDGET: the Car Plan PDF's budget numbers, on screen -->
+  <section id="tab-budget" class="tab-pane fade" role="tabpanel">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body d-flex flex-wrap align-items-end gap-3">
+        <div class="me-auto">
+          <h2 class="h5 mb-1"><i class="fa-solid fa-wallet me-2 text-primary"></i>Budget</h2>
+          <div class="small text-body-secondary">The same numbers as each car's Car Plan PDF — what it costs, what I repay, and my weekly budget at each payment step.</div>
+        </div>
+        <div><label class="form-label small mb-1" for="budget-car">Car</label><select id="budget-car" class="form-select"></select></div>
+        <div style="width:11rem"><label class="form-label small mb-1" for="budget-extra">What if I make…</label>
+          <div class="input-group"><input id="budget-extra" class="form-control" type="number" inputmode="numeric" min="1" max="200" placeholder="e.g. 38"><span class="input-group-text">/wk</span></div></div>
+        <div class="btn-group">
+          <a id="budget-plan-pdf" class="btn btn-primary" target="_blank" rel="noopener"><i class="fa-solid fa-file-lines me-1"></i>Car Plan PDF</a>
+          <a id="budget-report-pdf" class="btn btn-outline-primary" target="_blank" rel="noopener">Details PDF</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="budget-whatif" class="d-none mb-4" aria-live="polite"></div>
+    <div class="row row-cols-2 row-cols-lg-4 g-3 mb-4" id="budget-stats"></div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+          <div class="card-header fw-semibold"><i class="fa-solid fa-receipt me-2 text-primary"></i>What it costs <span class="budget-owner">Dad</span> and what <span class="budget-owner">Dad</span> gets back</div>
+          <div class="table-responsive"><table class="table mb-0 align-middle" id="budget-cost"></table></div>
+          <div class="card-body small text-body-secondary" id="budget-cost-note"></div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+          <div class="card-header fw-semibold"><i class="fa-solid fa-stairs me-2 text-primary"></i>Payment steps</div>
+          <div class="card-body" id="budget-steps"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex flex-wrap align-items-center gap-2">
+        <span class="fw-semibold me-auto"><i class="fa-solid fa-table me-2 text-primary"></i>Budget by number of deliveries</span>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Period">
+          <input type="radio" class="btn-check" name="budget-period" id="budget-weekly" value="week" checked>
+          <label class="btn btn-outline-secondary" for="budget-weekly">Weekly</label>
+          <input type="radio" class="btn-check" name="budget-period" id="budget-monthly" value="month">
+          <label class="btn btn-outline-secondary" for="budget-monthly">Monthly</label>
+        </div>
+      </div>
+      <div class="table-responsive"><table class="table table-sm table-hover align-middle mb-0" id="budget-table"></table></div>
+      <div class="card-body small text-body-secondary" id="budget-table-note"></div>
+    </div>
+
+    <div class="accordion shadow-sm" id="budget-sched-acc">
+      <div class="accordion-item">
+        <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#budget-sched">
+          <i class="fa-solid fa-calendar-days me-2"></i>Repayment schedule <span class="ms-2 text-body-secondary small" id="budget-sched-sum"></span></button></h3>
+        <div id="budget-sched" class="accordion-collapse collapse" data-bs-parent="#budget-sched-acc">
+          <div class="accordion-body">
+            <div class="btn-group btn-group-sm mb-3" role="group">
+              <input type="radio" class="btn-check" name="budget-basis" id="budget-basis-target" value="target" checked>
+              <label class="btn btn-outline-secondary" for="budget-basis-target">At target price</label>
+              <input type="radio" class="btn-check" name="budget-basis" id="budget-basis-asking" value="asking">
+              <label class="btn btn-outline-secondary" for="budget-basis-asking">At asking price</label>
+            </div>
+            <div class="table-responsive" style="max-height:420px"><table class="table table-sm table-striped mb-0" id="budget-sched-table"></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIN -->
+  <section id="tab-vin" class="tab-pane fade" role="tabpanel">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5 card-title">Decode a VIN &amp; check recalls</h2>
+        <p class="text-body-secondary small">Free data from NHTSA. Confirms the year/make/model/engine the seller claims, and lists recall campaigns for that model. Run the VIN at <a href="https://www.nhtsa.gov/recalls" target="_blank" rel="noopener">nhtsa.gov/recalls</a> to see if a specific car's recall was fixed.</p>
+        <form id="vin-form" class="input-group mb-3" style="max-width:560px">
+          <input class="form-control text-uppercase" name="vin" maxlength="17" placeholder="17-character VIN" required>
+          <button class="btn btn-primary"><i class="fa-solid fa-magnifying-glass me-1"></i>Look up</button>
+        </form>
+        <div id="vin-result"></div>
+      </div>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 card-title">Check history (paid / free)</h2>
+        <div class="list-group list-group-flush">
+          <a class="list-group-item list-group-item-action" href="https://vehiclehistory.bja.ojp.gov/nmvtis_vehiclehistory" target="_blank" rel="noopener"><b>NMVTIS approved providers</b> <span class="text-body-secondary">— cheap title-brand check (salvage, flood, junk)</span></a>
+          <a class="list-group-item list-group-item-action" href="https://www.nicb.org/vincheck" target="_blank" rel="noopener"><b>NICB VINCheck</b> <span class="text-body-secondary">— free theft &amp; total-loss check</span></a>
+          <a class="list-group-item list-group-item-action" href="https://www.carfax.com" target="_blank" rel="noopener"><b>Carfax</b> <span class="text-body-secondary">— full history report</span></a>
+          <a class="list-group-item list-group-item-action" href="https://www.autocheck.com" target="_blank" rel="noopener"><b>AutoCheck</b> <span class="text-body-secondary">— full history report</span></a>
+          <a class="list-group-item list-group-item-action" href="https://www.bar.ca.gov/consumer/smog-check-program" target="_blank" rel="noopener"><b>CA BAR smog check history</b> <span class="text-body-secondary">— past smog results by VIN or plate</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COST -->
+  <section id="tab-cost" class="tab-pane fade" role="tabpanel">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h2 class="h5 card-title">True cost to buy in Ridgecrest</h2>
+            <form id="cost-form" class="row g-3">
+              <div class="col-6 col-md-4"><label class="form-label">Vehicle price ($)</label><input class="form-control" name="price" type="number" value="25000" step="100"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Seller type</label><select class="form-select" name="sellerType"><option value="dealer">Dealer</option><option value="private">Private party</option></select></div>
+              <div class="col-6 col-md-4"><label class="form-label">Sales/use tax (%)</label><input class="form-control" name="taxRate" type="number" value="9.25" step="0.01"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Dealer doc fee ($)</label><input class="form-control" name="docFee" type="number" value="85"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Dealer e-filing &amp; misc ($)</label><input class="form-control" name="dealerMisc" type="number" value="40"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Trade-in value ($)</label><input class="form-control" name="tradeIn" type="number" value="0" step="100"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Owed on trade-in ($)</label><input class="form-control" name="tradeOwed" type="number" value="0" step="100"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Down payment ($)</label><input class="form-control" name="down" type="number" value="5000" step="100"></div>
+              <div class="col-6 col-md-4"><label class="form-label">APR (%)</label><input class="form-control" name="apr" type="number" value="7.5" step="0.1"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Term (months)</label><select class="form-select" name="term"><option>36</option><option>48</option><option selected>60</option><option>72</option><option>84</option></select></div>
+              <div class="col-6 col-md-4"><label class="form-label">Pre-purchase inspection ($)</label><input class="form-control" name="ppi" type="number" value="150"></div>
+              <div class="col-6 col-md-4"><label class="form-label">My max out-the-door ($)</label><input class="form-control" name="budget" type="number" step="500" placeholder="not set"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Miles driven per month</label><input class="form-control" name="milesMonth" type="number" value="1000" step="100"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Gas price ($/gal)</label><input class="form-control" name="gasPrice" type="number" value="4.75" step="0.05"></div>
+              <div class="col-12 col-md-4 d-flex align-items-end"><div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" role="switch" name="dmv" id="cost-dmv" checked>
+                <label class="form-check-label" for="cost-dmv">Include DMV fee estimate</label></div></div>
+            </form>
+            <div class="form-text mt-3">9.25% is the Ridgecrest city rate. If you live in unincorporated Kern County, use tax is lower — check <a href="https://maps.cdtfa.ca.gov/" target="_blank" rel="noopener">CDTFA's rate lookup</a>. Tax is charged on where the car is <em>registered</em>, not where you buy it.</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5"><div class="card shadow-sm h-100"><div class="card-body" id="cost-out"></div></div></div>
+    </div>
+  </section>
+
+  <!-- CAR PLAN -->
+  <section id="tab-plan" class="tab-pane fade" role="tabpanel">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 card-title">Car Plan settings</h2>
+        <div class="alert alert-info small">These personal numbers go into every car's <b>Car Plan</b> PDF (proposal, insurance plan, payment budget, agreement and payment record). Car-specific numbers — price, insurance, gas, maintenance, delivery targets and payoff — are worked out per car. Per-car details are in each car's Edit window.</div>
+        <form id="plan-form" class="row g-3"></form>
+        <div class="mt-3"><button type="button" id="plan-save" class="btn btn-primary"><i class="fa-solid fa-check me-1"></i>Save settings</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUIDE -->
+  <section id="tab-guide" class="tab-pane fade" role="tabpanel">
+    <div id="guide" class="row row-cols-1 row-cols-lg-2 g-3"></div>
+  </section>
+</main>
+
+<!-- Car editor modal -->
+<div class="modal fade" id="car-modal" tabindex="-1" aria-labelledby="car-dialog-title" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <form id="car-form" class="modal-content" novalidate>
+      <div class="modal-header">
+        <h2 class="modal-title h5" id="car-dialog-title">Add a car</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-8"><label class="form-label">Listing title</label><input class="form-control" name="title" placeholder="2018 Toyota Tacoma TRD Off-Road"></div>
+          <div class="col-md-4"><label class="form-label">Source</label><select class="form-select" name="source" id="car-source"></select></div>
+          <div class="col-4 col-md-2"><label class="form-label">Year</label><input class="form-control" name="year" type="number"></div>
+          <div class="col-4 col-md-2"><label class="form-label">Make</label><input class="form-control" name="make" list="makes"></div>
+          <div class="col-4 col-md-2"><label class="form-label">Model</label><input class="form-control" name="model"></div>
+          <div class="col-4 col-md-2"><label class="form-label">Trim</label><input class="form-control" name="trim"></div>
+          <div class="col-4 col-md-2"><label class="form-label">Price ($)</label><input class="form-control" name="price" type="number" step="100"></div>
+          <div class="col-4 col-md-2"><label class="form-label">Mileage</label><input class="form-control" name="mileage" type="number" step="100"></div>
+          <div class="col-md-5"><label class="form-label">VIN</label><input class="form-control text-uppercase" name="vin" maxlength="17"></div>
+          <div class="col-md-7"><label class="form-label">Listing URL</label><input class="form-control" name="url" type="url" placeholder="https://"></div>
+          <div class="col-6 col-md-3"><label class="form-label">Seller</label><input class="form-control" name="seller"></div>
+          <div class="col-6 col-md-3"><label class="form-label">Seller type</label><select class="form-select" name="seller_type"><option value="dealer">Dealer</option><option value="private">Private</option></select></div>
+          <div class="col-6 col-md-3"><label class="form-label">Phone</label><input class="form-control" name="phone"></div>
+          <div class="col-6 col-md-3"><label class="form-label">Location</label><input class="form-control" name="location" placeholder="Ridgecrest"></div>
+          <div class="col-6 col-md-3"><label class="form-label">Status</label><select class="form-select" name="status"></select></div>
+          <div class="col-6 col-md-3"><label class="form-label">My rating</label>
+            <select class="form-select" name="rating"><option value="0">–</option><option value="1">★</option><option value="2">★★</option><option value="3">★★★</option><option value="4">★★★★</option><option value="5">★★★★★</option></select></div>
+          <div class="col-12"><label class="form-label">Notes</label><textarea class="form-control" name="notes" rows="3"></textarea></div>
+        </div>
+
+        <div class="accordion mt-4" id="car-sections">
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec-rel"><i class="fa-solid fa-shield-halved me-2"></i>Reliability</button></h3>
+            <div id="sec-rel" class="accordion-collapse collapse" data-bs-parent="#car-sections"><div class="accordion-body">
+              <div class="row g-3">
+                <div class="col-md-4"><label class="form-label">Rating</label>
+                  <select class="form-select" id="rel-score"><option value="0">Unknown</option><option value="1">1 · Poor</option><option value="2">2 · Below average</option><option value="3">3 · Average</option><option value="4">4 · Good</option><option value="5">5 · Excellent</option></select></div>
+                <div class="col-md-8"><label class="form-label">Summary</label><textarea class="form-control" id="rel-summary" rows="2"></textarea></div>
+                <div class="col-md-6"><label class="form-label">Known issues for this model <span class="text-body-secondary">(one per line)</span></label><textarea class="form-control" id="rel-issues" rows="4"></textarea></div>
+                <div class="col-md-6"><label class="form-label">What to check on this car <span class="text-body-secondary">(one per line)</span></label><textarea class="form-control" id="rel-checks" rows="4"></textarea></div>
+              </div>
+              <div id="rel-stats" class="mt-3"></div>
+            </div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec-budget"><i class="fa-solid fa-coins me-2"></i>Budget &amp; insurance</button></h3>
+            <div id="sec-budget" class="accordion-collapse collapse" data-bs-parent="#car-sections"><div class="accordion-body">
+              <div class="row g-3">
+                <div class="col-6 col-md-2"><label class="form-label">MPG combined</label><input class="form-control" id="bud-mpg" type="number" step="1" placeholder="25 if blank"></div>
+                <div class="col-6 col-md-2"><label class="form-label">MPG highway</label><input class="form-control" id="bud-mpg-hwy" type="number" step="1" placeholder="optional"></div>
+                <div class="col-md-4"><label class="form-label">Insurance quote ($/mo)</label><input class="form-control" id="bud-ins" type="number" step="1" placeholder="estimate if blank"></div>
+                <div class="col-md-4"><label class="form-label">Coverage if paying cash</label><select class="form-select" id="bud-cov"><option value="">Auto</option><option value="full">Full coverage</option><option value="liability">Liability only</option></select></div>
+              </div>
+              <div class="form-text">Used in the Details PDF. Loan, APR, budget, gas price and miles/month come from the Cost Calculator tab.</div>
+            </div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec-plan"><i class="fa-solid fa-file-lines me-2"></i>Car Plan (PDF for Dad)</button></h3>
+            <div id="sec-plan" class="accordion-collapse collapse" data-bs-parent="#car-sections"><div class="accordion-body">
+              <div class="row g-3">
+                <div class="col-6 col-md-3"><label class="form-label">Target price ($)</label><input class="form-control" id="plan-target" type="number" step="100" placeholder="90% of price"></div>
+                <div class="col-6 col-md-3"><label class="form-label">Insurance in plan ($/mo)</label><input class="form-control" id="plan-ins" type="number" step="5" placeholder="estimated"></div>
+                <div class="col-6 col-md-3"><label class="form-label">City MPG</label><input class="form-control" id="plan-mpg" type="number" step="1" placeholder="from MPG"></div>
+                <div class="col-6 col-md-3"><label class="form-label">Weekly repair fund ($)</label><input class="form-control" id="plan-fund" type="number" step="5" placeholder="0"></div>
+                <div class="col-md-6"><label class="form-label">Extra costs I'll pay</label><input class="form-control" id="plan-extras" placeholder="e.g. the windshield repair (about $500)"></div>
+                <div class="col-md-6"><label class="form-label">Condition clause (agreement §8)</label><input class="form-control" id="plan-condition" placeholder="e.g. Son will pay to replace the cracked windshield."></div>
+                <div class="col-12"><label class="form-label">"We buy it only if" <span class="text-body-secondary">(one per line, optional)</span></label><textarea class="form-control" id="plan-buyif" rows="2"></textarea></div>
+              </div>
+            </div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec-photos"><i class="fa-solid fa-images me-2"></i>Photos</button></h3>
+            <div id="sec-photos" class="accordion-collapse collapse" data-bs-parent="#car-sections"><div class="accordion-body">
+              <div id="photo-section">
+                <div id="photo-grid" class="row row-cols-3 row-cols-md-6 g-2 mb-3"></div>
+                <div class="input-group">
+                  <label class="btn btn-outline-primary mb-0"><i class="fa-solid fa-upload me-1"></i>Upload photos<input type="file" id="photo-files" accept="image/*" multiple hidden></label>
+                  <input id="photo-url" class="form-control" type="url" placeholder="…or paste an image URL">
+                  <button type="button" id="photo-url-add" class="btn btn-outline-secondary">Add</button>
+                </div>
+              </div>
+              <div id="photo-save-first" class="alert alert-secondary mb-0">Save the car first, then reopen it to add photos.</div>
+            </div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec-check"><i class="fa-solid fa-list-check me-2"></i>Vetting checklist</button></h3>
+            <div id="sec-check" class="accordion-collapse collapse" data-bs-parent="#car-sections"><div class="accordion-body">
+              <div id="checklist" class="row row-cols-1 row-cols-md-2 g-1"></div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="car-delete" class="btn btn-outline-danger me-auto"><i class="fa-solid fa-trash-can me-1"></i>Delete</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check me-1"></i>Save</button>
+      </div>
+    </form>
+  </div>
 </div>
 
+<!-- Photo viewer: Bootstrap carousel in a fullscreen modal, with thumbnails -->
+<div class="modal fade" id="photo-modal" tabindex="-1" aria-label="Photos" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content bg-black">
+      <div class="modal-header border-0 py-2">
+        <span class="badge text-bg-dark fs-6" id="photo-count"></span>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body d-flex flex-column p-0 overflow-hidden">
+        <div id="photo-carousel" class="carousel slide flex-grow-1 d-flex align-items-center" data-bs-touch="true">
+          <div class="carousel-inner h-100"></div>
+          <button class="carousel-control-prev photo-nav" type="button" data-bs-target="#photo-carousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span><span class="visually-hidden">Previous photo</span></button>
+          <button class="carousel-control-next photo-nav" type="button" data-bs-target="#photo-carousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span><span class="visually-hidden">Next photo</span></button>
+        </div>
+        <div id="photo-thumbs" class="d-flex gap-2 overflow-x-auto px-3 py-2 flex-shrink-0" role="tablist" aria-label="All photos"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PDF viewer: keeps PDFs inside the app (an installed app has no back button) -->
+<div class="modal fade" id="pdf-modal" tabindex="-1" aria-labelledby="pdf-title" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header py-2 gap-2">
+        <h2 class="modal-title h6 text-truncate me-auto" id="pdf-title">PDF</h2>
+        <div class="spinner-border spinner-border-sm text-primary d-none" id="pdf-spinner" role="status"><span class="visually-hidden">Loading</span></div>
+        <a class="btn btn-sm btn-outline-primary" id="pdf-download" download><i class="fa-solid fa-download me-1"></i>Download</a>
+        <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa-solid fa-xmark me-1"></i>Close</button>
+      </div>
+      <div class="modal-body p-0 bg-body-secondary">
+        <iframe id="pdf-frame" class="w-100 h-100 border-0 d-block" title="PDF document"></iframe>
+        <div id="pdf-fallback" class="d-none h-100 flex-column align-items-center justify-content-center text-center p-4">
+          <i class="fa-solid fa-file-pdf display-3 text-primary mb-3"></i>
+          <p class="mb-3" id="pdf-fallback-text">This device can't show PDFs inside the app.</p>
+          <a class="btn btn-primary" id="pdf-fallback-download" download><i class="fa-solid fa-download me-1"></i>Download the PDF</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal (replaces window.confirm) -->
+<div class="modal fade" id="confirm-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body" id="confirm-text"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-ok">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit PIN (the server refuses changes without it) -->
+<div class="modal fade" id="pin-modal" tabindex="-1" aria-labelledby="pin-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <form class="modal-content" id="pin-form" autocomplete="off">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="pin-title"><i class="fa-solid fa-shield-halved me-2"></i>Enter edit PIN</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-body-secondary">Viewing is open; saving changes needs the PIN.</p>
+        <input type="password" class="form-control form-control-lg text-center" id="pin-input" name="pin"
+               inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="off" aria-label="Edit PIN" required>
+        <div class="invalid-feedback d-block" id="pin-error" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="pin-ok"><i class="fa-solid fa-lock-open me-1"></i>Unlock</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Offline status, install and "save for offline" controls -->
+<div id="pwa-bar" class="position-fixed bottom-0 start-0 p-3 d-flex gap-2 align-items-center">
+  <span id="offline-badge" class="badge text-bg-warning shadow d-none"><i class="fa-solid fa-plug-circle-xmark me-1"></i>Offline — showing saved data</span>
+  <button type="button" id="edit-lock" class="btn btn-sm btn-light border shadow-sm" title="Editing needs the PIN">
+    <i class="fa-solid fa-lock me-1"></i><span>Locked</span></button>
+  <button type="button" id="save-offline" class="btn btn-sm btn-light border shadow-sm" title="Save every car, photo, budget and PDF so the app works without internet">
+    <i class="fa-solid fa-cloud-arrow-down me-1"></i><span>Save for offline</span></button>
+  <button type="button" id="install-app" class="btn btn-sm btn-primary shadow-sm d-none"><i class="fa-solid fa-download me-1"></i>Install app</button>
+</div>
+
+<!-- Toasts (replace alert()) -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toasts"></div>
+
 <footer class="app-footer text-center small py-4">
+  <!-- Canyon rim: the page's sand drops away into the night road -->
   <svg class="footer-rim" viewBox="0 0 1440 56" preserveAspectRatio="none" aria-hidden="true" focusable="false">
     <path d="M0 0 H1440 V18 L1380 22 L1352 40 L1270 40 L1250 26 L1120 24 L1040 30 L1000 46 L900 46 L880 30 L760 26
       L640 32 L600 44 L520 44 L500 28 L380 24 L300 30 L270 48 L170 48 L150 30 L60 26 L0 30 Z"/>
   </svg>
-  <div class="container-xl"><div class="mb-1"><i class="fa-solid fa-route me-1"></i>Drive safe out there.</div>
-    Snapshot of October 26, 2026 · VIN &amp; recall data from NHTSA · not an offer to sell</div>
+  <div class="container-xl">
+    <div class="mb-1"><i class="fa-solid fa-route me-1"></i>Drive safe out there.</div>
+    Snapshot of October 26, 2026 · read-only copy of the Ridgecrest Car Finder · VIN &amp; recall data from NHTSA
+  </div>
 </footer>
 
-<script id="data" type="application/json">{"updated":"October 26, 2026","cars":[{"id":2,"title":"2018 Honda Fit LX","year":2018,"make":"Honda","model":"Fit","price":10000.0,"mileage":112000,"location":"Ridgecrest, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"contacted","url":"https://www.facebook.com/marketplace/item/1047836844685006/","vin":"","rating":0,"notes":"Automatic, black/black, gasoline. Clean title, but MONEY STILL OWED (lien) - payoff must go to the lender and title released before you get it.\nSeller: well maintained; slight body damage driver side; new tires within 6 mo; recent oil change; no mechanical issues; CarPlay; collision + lane-drift sensing; 35 MPG.\nCrack in driver window (seller says ~$500 local fix) - use in negotiation.\nSmog passed Jul 27 - cert good 90 days, expires ~Oct 25. Buy before then or seller must re-smog.\nRed flags: listing says 'turbo' but the 2018 Fit has no turbo (1.5L non-turbo) - ask. Listed 11 weeks ago -> room to negotiate. New FB account (2026).\nTODO: get VIN.\nRECALLS (model-level, confirm by VIN they're done - free at a Honda dealer): rearview camera may not display (23V-046 + redo 24V-384); fuel pump may fail -> stall (23V-858); passenger seat weight sensor / airbag (26V-332, May 2026 - likely still open).","electric":false,"mpg_city":33,"mpg_hwy":40,"mpg":36,"reliability":{"score":4,"summary":"Good. Late 3rd-gen Fit (2015 launch-year bugs mostly fixed). Simple non-turbo 1.5L, cheap parts. Lowest NHTSA complaint count of your shortlist. Main risk is the CVT at 112k.","issues":["CVT hesitation/whine/judder - most-reported serious issue","Some oil consumption reports","Starter and ignition coil failures (cheap fixes)","A/C recharge / blower motor issues","Recalls: fuel pump (stall), rearview camera (x2), passenger seat weight sensor/airbag (2026)"],"checks":["Ask for CVT fluid change records (should have 1-2 by 112k)","Test drive: smooth pull from a stop, no whine or slip feeling","Check oil level on dipstick","A/C cold after 15 min","Run VIN: are the 4 recalls done? (free at Honda dealer)"]},"images":["images/2/00.jpg","images/2/01.jpg","images/2/02.jpg","images/2/03.jpg","images/2/04.jpg","images/2/05.jpg","images/2/06.jpg","images/2/07.jpg","images/2/08.jpg","images/2/09.jpg"]},{"id":3,"title":"2015 Chevrolet Cruze","year":2015,"make":"Chevrolet","model":"Cruze","price":5000.0,"mileage":143057,"location":"Ridgecrest, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"passed","url":"https://www.facebook.com/marketplace/item/1802364164125848/","vin":"","rating":0,"notes":"$5,000 OBO. Automatic, blue/black, gasoline. Paid off, 2 owners, 'good condition'. Listed ~Oct 12. Seller got a different car.\nNo smog mentioned - seller must provide a smog cert (< 90 days).\nTrim unknown: LS = 1.8L (simpler); 1LT/2LT/LTZ/Eco = 1.4L turbo (coolant leaks, PCV/valve cover, oil leaks, overheating). Ask which engine.\nAsk: cooling system repairs (water pump, thermostat housing, coolant reservoir), any overheating, transmission service.\nTODO: get VIN.\nRECALLS (model-level, depend on build date - confirm by VIN): parking brake cable bracket (15V-113, Feb 2015 builds); driver seat belt bolt (15V-876); steering (15V-442). Likely already fixed on a 10-yr-old car - check via VIN.","electric":false,"mpg_city":24,"mpg_hwy":36,"mpg":28,"reliability":{"score":2,"summary":"Below average. 1st-gen Cruze has a weak cooling system and oil leaks, especially the 1.4L turbo. 252 owner complaints, 99 about the engine. Risky in desert heat.","issues":["1.4T: coolant leaks (water pump, thermostat housing, coolant tank) - plastic parts crack","1.4T: PCV valve in valve cover fails -> oil leaks, whistling, rough idle","Oil cooler line / turbo oil feed leaks","Overheating","6-speed automatic harsh shifts / failure at high miles","Recalls: parking brake bracket, seat belt bolt, steering (build-date specific)"],"checks":["Which engine? 1.8L (LS) is the safer one","Look for dried coolant crust, sweet smell, low reservoir","Watch temp gauge on a hill / long idle","Ask what cooling parts have been replaced","Pre-purchase inspection"]},"images":["images/3/00.jpg","images/3/01.jpg","images/3/02.jpg","images/3/03.jpg","images/3/04.jpg"]},{"id":4,"title":"2016 Ford Fusion SEL","year":2016,"make":"Ford","model":"Fusion","price":5400.0,"mileage":175000,"location":"Ridgecrest, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"passed","url":"https://www.facebook.com/marketplace/item/27329971493309454/","vin":"","rating":0,"notes":"$5,400. Automatic, silver/black, gasoline, 4-cyl. 2 owners, paid off. Seller: AC cold, good on gas, 'dependable'. Listed ~17 weeks -> negotiate hard.\nVery high miles (175k). No maintenance/smog info - seller must provide smog cert (< 90 days).\nENGINE MATTERS: 2.5L non-turbo = the one you want. 1.5L EcoBoost has known coolant-into-cylinder defect (white smoke, coolant loss, misfire). Ask which engine.\nAlso check: transmission (6-speed) shudder/harsh shifts; power steering warning lights.\nRECALLS (13 for model year; confirm by VIN): shifter cable bushing can detach -> car not in gear shown/may roll away (18V-471, 19V-362, 22V-413) - IMPORTANT; door latch (20V-177, 23V-775 - CA included); front brake hoses may rupture (23V-162); steering wheel bolt may loosen (18V-167); rearview camera (25V-695); plus build-date-specific seat belt/seat/fuel tank.\nTODO: get VIN.","electric":false,"mpg_city":22,"mpg_hwy":34,"mpg":26,"reliability":{"score":3,"summary":"Average - IF it has the 2.5L non-turbo. The 1.5L EcoBoost has a coolant-intrusion defect that can ruin the engine. Very high 175k miles and the most recalls/complaints of your shortlist (13 recalls, 1,722 complaints).","issues":["1.5L EcoBoost: coolant leaks into cylinders (white smoke, coolant loss, misfire)","6-speed automatic shudder / harsh shifts","Electric power steering failure warnings","Shifter cable bushing can detach -> wrong gear / rollaway (3 recalls)","Front brake hoses can rupture (recall)","Door latch, steering wheel bolt, rearview camera recalls"],"checks":["Confirm engine: 2.5L = OK, 1.5L = walk away","Check coolant level and exhaust for white smoke","Shift through P-R-N-D; gear shown must match","Ford dealer VIN check for open recalls (Jim Charlon Ford)","Pre-purchase inspection - 175k miles"]},"images":["images/4/00.jpg","images/4/01.jpg","images/4/02.jpg","images/4/03.jpg","images/4/04.jpg","images/4/05.jpg","images/4/06.jpg","images/4/07.jpg","images/4/08.jpg","images/4/09.jpg"]},{"id":5,"title":"2007 Honda Civic EX Coupe","year":2007,"make":"Honda","model":"Civic","price":1900.0,"mileage":122000,"location":"Mojave, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"sold","url":"https://www.facebook.com/marketplace/item/1423664949948150/","vin":null,"rating":4,"notes":"$1,900, 122k, automatic, blue/brown. Clean title, tags current, AC working, 'everything works'. Listed ~Oct 18.\nBEST VALUE but priced low for 122k -> confirm title in seller's name, check VIN mileage history. New FB account.\n2006-2009 Civic 1.8L: check for cracked engine block (coolant loss, residue near block/thermostat) and A/C compressor. ~1 hr drive to Mojave.\nSeller must provide smog cert.\n2026-10-23: LISTING REMOVED - no longer on Facebook Marketplace (likely sold).","electric":false,"mpg_city":25,"mpg_hwy":36,"mpg":29,"reliability":{"score":3,"summary":"Average for this year. The 8th-gen Civic is generally durable, but 2006-09 1.8L engines are known for cracked engine blocks (avg ~83k miles, ~$2,600 fix). Honda's 10-year extended block warranty has expired. 9 recalls including Takata airbags.","issues":["Cracked engine block (1.8L R18, 2006-09) - coolant loss, overheating","Peeling paint / clear coat (worse in desert sun)","Premature rear tire wear (rear suspension geometry)","A/C compressor / condenser failure","Engine mounts","Takata airbag inflator recalls - must be done"],"checks":["Coolant reservoir level; look for blue/green crust on the block below the exhaust manifold","Ask if the block was ever replaced (records = big plus)","A/C cold after 15 min","Inspect rear tire inner edges","Run VIN: Takata airbag recall completed?"]},"images":["images/5/00.jpg","images/5/01.jpg","images/5/02.jpg","images/5/03.jpg","images/5/04.jpg","images/5/05.jpg","images/5/06.jpg"]},{"id":6,"title":"2013 Dodge Challenger SXT","year":2013,"make":"Dodge","model":"Challenger","price":8700.0,"mileage":113000,"location":"Ridgecrest, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"sold","url":"https://www.facebook.com/marketplace/item/1405437455036959/","vin":"","rating":3,"notes":"$8,700, 113k, automatic, grey/black. Clean title, paid off, claims bought new + maintained. New tires, 22\" rims, fresh oil change, SMOG DONE, backup camera, tint. Listed Oct 18.\n3.6L V6 Pentastar: early (2011-13) engines had left cylinder head valve-train issue (ticking, misfire cyl 2) - listen for tick. 22\" rims = expensive tires, harsh ride.\nAsk for service records since new. Local - easy to see.\n2026-10-23: LISTING REMOVED - no longer on Facebook Marketplace (likely sold).","electric":false,"mpg_city":18,"mpg_hwy":27,"mpg":21,"reliability":{"score":3,"summary":"Average. 3.6L Pentastar V6 + 5-speed auto is a durable combo with maintenance, but early (2011-13) engines had a left cylinder head defect. 179 complaints, mostly electrical.","issues":["Left cylinder head defect (cyl #2 valve seat) on engines built before mid-2012/2013 - misfire, ticking","Plastic oil filter housing cracks -> oil and/or coolant leaks (very common)","Rocker arm wear ('Pentastar tick')","Electrical issues (most-complained category)","Big 22\" wheels: expensive tires, harsh ride, bent-rim risk"],"checks":["Check build date on driver door sticker","Listen for ticking from driver's side at idle","Look for oil/coolant leaks at the back of the engine valley (oil filter housing)","Ask if cylinder head was replaced under warranty","Scan for codes (P0302 / P0304 misfires)"]},"images":["images/6/00.jpg","images/6/01.jpg","images/6/02.jpg","images/6/03.jpg","images/6/04.jpg","images/6/05.jpg","images/6/06.jpg","images/6/07.jpg","images/6/08.jpg","images/6/09.jpg"]},{"id":7,"title":"2013 Audi A4 allroad Premium Plus","year":2013,"make":"Audi","model":"allroad","price":6000.0,"mileage":140146,"location":"Ridgecrest, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"passed","url":"https://www.facebook.com/marketplace/item/2949668935399096/","vin":"","rating":3,"notes":"$6,000, 140k, automatic AWD wagon, silver/black. Owned since 2023, stock, oil every 3,500 mi, new brakes, A/C cold, everything works. Honest cosmetic list (peeling bumper, fog covers missing, sun-faded clear coat).\nMost thorough/credible listing. BUT 2.0T: check oil consumption, timing chain tensioner, water pump/thermostat (plastic, leaks), carbon buildup. Repairs are pricey - PPI at a European shop is a must.\nTitle status not stated - ask. Needs smog cert.","electric":false,"mpg_city":20,"mpg_hwy":27,"mpg":23,"reliability":{"score":2,"summary":"Below average - not because it's unsafe, but because repairs are expensive. 2013 is considered one of the weaker allroad years. Few NHTSA complaints (13), but the 2.0T EA888 engine has well-known costly failure points around 90k+ miles.","issues":["Oil consumption (EA888 2.0T) - Audi warranty extension existed","Timing chain tensioner failure - catastrophic engine damage if missed (~$4k repair)","Water pump / thermostat housing leaks (plastic)","Carbon buildup on intake valves (direct injection)","PCV / oil separator failure","Suspension rattles"],"checks":["Ask: has the timing chain/tensioner been replaced? (proof = big plus)","Ask for oil consumption history; check level","Look for coolant leaks around water pump","Pre-purchase inspection at a European specialist","Budget $1-2k/year for repairs"]},"images":["images/7/00.jpg","images/7/01.jpg","images/7/02.jpg","images/7/03.jpg","images/7/04.jpg","images/7/05.jpg","images/7/06.jpg","images/7/07.jpg","images/7/08.jpg","images/7/09.jpg"]},{"id":8,"title":"2005 Honda Accord LX","year":2005,"make":"Honda","model":"Accord","price":3000.0,"mileage":220000,"location":"California City, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"passed","url":"https://www.facebook.com/marketplace/item/1150594717632968/","vin":"","rating":2,"notes":"$3,000 negotiable, 220k, automatic, black/tan. Clean title, tags paid, CarPlay installed.\nSays 'needs a smog' - in CA the SELLER must provide a passing smog cert. Don't buy until it passes.\nBudget backup. Confirm 4-cyl (V6 auto in this gen has weak transmissions). Very high miles.","electric":false,"mpg_city":21,"mpg_hwy":31,"mpg":24,"reliability":{"score":4,"summary":"Good model with the 4-cylinder (2.4L K24 is very durable). But this car has 220k miles, and the 2005 Accord has 24 recalls - mostly Takata airbag inflators, which are dangerous if not replaced.","issues":["Takata airbag inflators (multiple recalls) - can rupture and spray metal","Automatic transmission software/secondary shaft recall (4-cyl 2005-2010)","V6 automatics in this generation fail often (avoid V6)","Power steering pump leaks/whine","Door lock actuators, A/C compressor clutch","220k miles = wear items everywhere"],"checks":["Confirm 4-cylinder","Run VIN: Takata airbag recalls MUST be completed","Seller must provide smog cert (listing says 'needs smog')","Test shifting: no flare/slip between gears","Look for oil leaks, check suspension bushings"]},"images":["images/8/00.jpg","images/8/01.jpg","images/8/02.jpg","images/8/03.jpg"]},{"id":9,"title":"2016 Hyundai Accent SE Hatchback","year":2016,"make":"Hyundai","model":"Accent","price":8735.0,"mileage":94710,"location":"Ridgecrest, CA","seller":"American Dream Auto Sales (Ed), 239 E Ridgecrest Blvd","seller_type":"dealer","source":"AutosToday","status":"interested","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/KMHCT5AE4GU267426/2016-hyundai-accent-se-6at-5-door-ridgecrest-ca","vin":"KMHCT5AE4GU267426","rating":4,"notes":"Dealer stock #11304. White/gray, 1.6L 4-cyl, 6-speed automatic. Clean title, 1 previous owner (RENTAL). AutoCheck: ACCIDENT REPORTED - get the report, have the inspection check for frame/structural repair.\nPrice: $8,735, 18% above market avg $7,427 (AutosToday 'Poor buy'). Was $10,998, already dropped $2,263. Target ~$7,500. Dealer est. out-the-door $9,753.\nSimple, cheap to insure and fix, ~26 city MPG. Good DoorDash car if the accident was minor.","electric":false,"mpg_city":26,"mpg_hwy":37,"mpg":30,"reliability":{"score":4,"summary":"Good. Simple 1.6L with a conventional 6-speed automatic (no CVT). Cheap parts, cheap insurance. Main unknowns on this car: the reported accident and rental-fleet use.","issues":["1.6L GDI: some carbon buildup / oil consumption at high miles","Ex-rental: hard use, often only basic maintenance","Steering coupler noise (clunk) on this generation","A/C: check it stays cold"],"checks":["Get the AutoCheck report: how bad was the accident? airbags?","Inspection: frame, panel gaps, paint overspray, alignment","Check oil level/consumption","Run VIN for open recalls (Hyundai dealer)"]},"images":["images/9/00.jpg","images/9/01.jpg","images/9/02.jpg","images/9/03.jpg","images/9/04.jpg","images/9/05.jpg","images/9/06.jpg","images/9/07.jpg","images/9/08.jpg","images/9/09.jpg","images/9/10.jpg","images/9/11.jpg"]},{"id":10,"title":"2013 Ford C-Max Energi SEL (plug-in hybrid)","year":2013,"make":"Ford","model":"C-Max","price":8730.0,"mileage":92931,"location":"Ridgecrest, CA","seller":"American Dream Auto Sales (Ed), 239 E Ridgecrest Blvd","seller_type":"dealer","source":"AutosToday","status":"passed","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/1FADP5CU8DL522636/2013-ford-c-max-sel-energi-ridgecrest-ca","vin":"1FADP5CU8DL522636","rating":3,"notes":"Dealer stock #11287. Gray/black, 2.0L plug-in hybrid. Clean title, ACCIDENT FREE, lease/fleet history.\nPrice: $8,730, 27% above market avg $6,852 ('Poor buy'). On the lot 156 days and price went UP $180 -> lots of room. Target ~$7,000. Dealer est. out-the-door $9,748.\nBest fuel economy on the lot: ~40 city MPG as a hybrid, plus ~20 mi electric per charge if you can plug in at home. Cuts DoorDash gas roughly in half vs a 22 MPG car.\nBIG RISK: CarComplaints' #1 issue for 2013 Energi = transmission failure ~103k mi, ~$9,100 avg. This car is at 93k.","electric":false,"mpg_city":40,"mpg_hwy":36,"mpg":38,"reliability":{"score":2,"summary":"Below average for reliability, excellent for fuel cost. Consumer Reports rates the 2013 C-Max below average. The expensive risks are the hybrid transmission and an aging high-voltage battery, both near this car's mileage.","issues":["Hybrid transmission failure (avg ~103k mi, ~$9,100 repair)","High-voltage battery capacity loss -> shorter EV range","12V battery dies often (cheap fix, ~$100)","8 recalls for 2013 C-Max (door latches, etc.)"],"checks":["Hybrid-specific inspection: battery health scan, EV range at full charge","Ask for transmission service/software update records","Any 'Stop Safely Now' warnings in history?","Can you charge at home? (worth it only with home charging or lots of city driving)","Ask about any remaining Ford hybrid-component warranty (CA: 10yr/150k on some hybrid parts)"]},"images":["images/10/00.jpg","images/10/01.jpg","images/10/02.jpg","images/10/03.jpg","images/10/04.jpg","images/10/05.jpg","images/10/06.jpg","images/10/07.jpg","images/10/08.jpg","images/10/09.jpg","images/10/10.jpg","images/10/11.jpg","images/10/12.jpg"]},{"id":11,"title":"2011 Ford Fusion SEL 2.5L","year":2011,"make":"Ford","model":"Fusion","price":8170.0,"mileage":119219,"location":"Ridgecrest, CA","seller":"American Dream Auto Sales (Ed), 239 E Ridgecrest Blvd","seller_type":"dealer","source":"AutosToday","status":"passed","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/3FAHP0JA4BR304737/2011-ford-fusion-sel-i-4-ridgecrest-ca","vin":"3FAHP0JA4BR304737","rating":3,"notes":"Dealer stock #11256. Red/black, 2.5L 4-cyl (the good engine), 6-speed auto. Clean title, ACCIDENT FREE, lease/rental/fleet history.\nPrice: $8,170, 31% above market avg $6,224 ('Poor buy'). 137 days on lot, price RAISED $615. Target ~$6,300. Dealer est. out-the-door $9,147.\n2010-12 Fusion 2.5 is one of the more dependable midsize sedans of its era, but ~23 city MPG costs more in gas for DoorDash.","electric":false,"mpg_city":23,"mpg_hwy":33,"mpg":26,"reliability":{"score":3,"summary":"Average-to-good drivetrain (2.5L + 6-speed), but 2011 Fusion has 2,794 NHTSA complaints - over half about the electric power steering failing. The CA cars were not included in Ford's steering recall.","issues":["Electric power steering failure ('Steering assist fault', heavy steering) - most-complained item","Transmission harsh shifts / shudder at high miles","Throttle body issues (reduced power mode)","Ex-rental/fleet: hard use"],"checks":["Ask if the steering rack/EPAS was replaced","Test drive: any steering warning, notchy or heavy steering","Shift quality cold and warm","Run VIN for 9 recalls"]},"images":["images/11/00.jpg","images/11/01.jpg","images/11/02.jpg","images/11/03.jpg","images/11/04.jpg","images/11/05.jpg","images/11/06.jpg","images/11/07.jpg","images/11/08.jpg","images/11/09.jpg","images/11/10.jpg","images/11/11.jpg"]},{"id":12,"title":"2015 Mazda3 i Grand Touring Hatchback","year":2015,"make":"Mazda","model":"Mazda3","price":13800.0,"mileage":78600,"location":"Ridgecrest, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"interested","url":"https://www.facebook.com/marketplace/item/1263271368765158/","vin":null,"rating":4,"notes":"$13,800 OBO, 78,600 mi, automatic, white/black, 2.0L Skyactiv. 2 owners, paid off, CLEAN TITLE in hand, tags current, SMOG DONE, 0 accidents.\nSeller: runs great; few small dents; front door speakers old; aesthetic mods (carbon fiber), no engine mods. Selling for a truck down payment.\nListed ~26 weeks -> negotiate. Over the ~$10k budget at asking.\nSeller won't answer the auto 'Is this still available?' message - write a real message.","electric":false,"mpg_city":30,"mpg_hwy":40,"mpg":33,"reliability":{"score":4,"summary":"Good. 3rd-gen Mazda3 (2014-2018) with the 2.0L Skyactiv and a conventional 6-speed automatic (no CVT) is one of the more reliable compacts of its era, and the lowest-mileage car on your list. 30 city / 40 hwy MPG.","issues":["Mazda Connect touchscreen 'ghost touch' / freezing (2014-2016 Grand Touring)","A/C condenser or compressor failures reported","Some carbon buildup on direct-injection engines at higher miles","Aftermarket/aesthetic mods: check nothing affects smog or insurance","Recalls (4): fuel tank, parking-brake caliper (water can enter), rearview camera - confirm done by VIN"],"checks":["Confirm the smog certificate date (valid 90 days)","Test the infotainment screen and backup camera","A/C cold after 15 min","Look at the 'few small dents' and any mod wiring","Run VIN for open recalls"]},"images":["images/12/00.jpg","images/12/01.jpg","images/12/02.jpg","images/12/03.jpg","images/12/04.jpg","images/12/05.jpg","images/12/06.jpg","images/12/07.jpg"]},{"id":13,"title":"2009 Toyota Camry","year":2009,"make":"Toyota","model":"Camry","price":5000.0,"mileage":148000,"location":"Ridgecrest, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"passed","url":"https://www.facebook.com/marketplace/item/27415202271474357/","vin":"","rating":3,"notes":"$5,000 OBO, 148k mi. Condition 'Used - Fair', 'up to date on maintenance'. Listed ~15 weeks. Very short listing: ask for trim/engine (2.4L 4-cyl vs 3.5L V6), title status, smog, service records, photos of dash.\nBudget backup: cheap and Toyota-durable, but ~21 city MPG costs more in gas than the Fit/Mazda.","electric":false,"mpg_city":21,"mpg_hwy":31,"mpg":25,"reliability":{"score":4,"summary":"Good overall - Camrys of this generation commonly pass 200k - but the 2007-2009 2.4L 4-cylinder is known for burning oil, and the dashboards of 2007-2011 Camrys can melt and get sticky in desert heat.","issues":["2.4L (2AZ-FE) oil consumption from piston rings (2007-2009); Toyota's extended coverage has expired","Sticky/melting dashboard in heat (2007-2011)","Water pump leaks","Recalls (10): accelerator pedal / floor mat entrapment, power-window switch can overheat, brake-light switch (2009 build dates) - confirm done by VIN"],"checks":["Which engine? Check oil level and ask how often it needs topping up","Look for blue exhaust smoke at startup","Inspect the dashboard surface","Run VIN at a Toyota dealer for open recalls (free)","Seller must provide a smog certificate"]},"images":["images/13/00.jpg","images/13/01.jpg","images/13/02.jpg"]},{"id":14,"title":"2011 Ford Crown Victoria LX","year":2011,"make":"Ford","model":"Crown Victoria","price":6750.0,"mileage":103600,"location":"Ridgecrest, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"passed","url":"https://www.facebook.com/marketplace/item/956447557241590/","vin":"","rating":3,"notes":"$6,750 OBO, 103,600 mi, 4.6L V8 flex-fuel, automatic, black/beige. Clean title, cold A/C, 'good condition'. Listed ~24 weeks -> negotiate. Seller gives VIN on request.\nRun the VIN for fleet/police/taxi history (many Crown Vics were fleet cars; LX trims were usually sold to the public).\nVery durable, but 16 city MPG makes it expensive for DoorDash.","electric":false,"mpg_city":16,"mpg_hwy":24,"mpg":19,"reliability":{"score":4,"summary":"Good. The Panther-platform Crown Victoria with the 4.6L V8 is famously durable (police and taxi fleets ran them to 300k+). Only 23 NHTSA complaints for 2011. The downside is fuel: 16 city MPG.","issues":["Very poor city fuel economy (16 MPG)","HVAC blend-door actuator clicking / heat-A/C stuck","Steering components wear (most-complained item)","Ex-fleet cars may have hard idle hours"],"checks":["Get the VIN: check for fleet/police/taxi use","A/C cold after 15 min (seller says cold)","Listen for clunks over bumps (steering/suspension)","Seller must provide a smog certificate","2 recalls - check by VIN"]},"images":["images/14/00.jpg","images/14/01.jpg","images/14/02.jpg","images/14/03.jpg","images/14/04.jpg"]},{"id":15,"title":"1995 Toyota Tercel DX (5-speed manual)","year":1995,"make":"Toyota","model":"Tercel","price":3300.0,"mileage":169000,"location":"Ridgecrest, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"passed","url":"https://www.facebook.com/marketplace/item/891216283383471/","vin":"","rating":3,"notes":"$3,300 OBO, 169k mi, 5-SPEED MANUAL, white. Clean title, paid off, 3+ owners. Seller: 'just fixed up everything', ~30 MPG ('30 bucks a month for gas').\nMods: MUFFLER DELETE (illegal in CA - won't pass smog/inspection; seller still has the stock muffler, make them reinstall it), underglow lights (CA limits colors/use), aftermarket rims (stock included), CarPlay screen (OEM head unit kept).\nListed 41 weeks, seller 'not in a rush'.\nA 30-year-old car: basic safety equipment by today's standards. You must be able to drive a manual.\n2026-10-24: Facebook listing now marked PENDING.","electric":false,"mpg_city":27,"mpg_hwy":35,"mpg":30,"reliability":{"score":4,"summary":"Good for its age: the Tercel's 1.5L and manual gearbox are simple and long-lived, and it gets ~30 MPG. But it's 30 years old, so wear items (rubber, seals, suspension, clutch) and older-car safety are the trade-offs.","issues":["Age: dried rubber hoses/seals, worn suspension bushings","Clutch wear (manual transmission)","Basic safety equipment by modern standards; airbag complaints for this year","Muffler delete and underglow must be made street-legal"],"checks":["Seller reinstalls the stock muffler before sale; smog certificate required","Clutch: no slipping in 3rd/4th under load, smooth engagement","A/C: does it work, and has it been converted to R-134a?","Look for leaks under the car and check timing belt history","Can you drive a manual comfortably for delivery stop-and-go?"]},"images":["images/15/00.jpg","images/15/01.jpg","images/15/02.jpg","images/15/03.jpg"]},{"id":16,"title":"2004 Hyundai Sonata LX","year":2004,"make":"Hyundai","model":"Sonata","price":2500.0,"mileage":143000,"location":"Ridgecrest, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"sold","url":"https://www.facebook.com/marketplace/item/1724944808597038/","vin":"","rating":2,"notes":"$2,500 (was $3,500), 143k mi, automatic, white/tan, likely the 2.7L V6 (listing shows 17 city MPG). 1 owner, clean title. Seller: no issues, runs perfectly, brand new tires; some seat damage and front bumper paint damage.\nCheapest clean-title car in town - a short-term 'bridge car' option.\n2026-10-23: LISTING REMOVED - no longer on Facebook Marketplace (likely sold).","electric":false,"mpg_city":17,"mpg_hwy":25,"mpg":20,"reliability":{"score":3,"summary":"Average. The 2004 Sonata is a simple, cheap-to-fix car, but at 143k with a V6 (17 city MPG) it's a short-term option. 202 NHTSA complaints, mostly suspension and body structure.","issues":["Timing belt must be replaced on schedule (~60k miles) - a snapped belt strands you","Front lower control arm / subframe corrosion recall (09V-124)","Crank or cam position sensor failures (stalling)","Passenger airbag occupant-sensor faults"],"checks":["Ask for timing belt replacement records","Run VIN: was the suspension recall done?","Check for a lit airbag warning light","Seller must provide a smog certificate"]},"images":["images/16/00.jpg"]},{"id":17,"title":"2012 Nissan Sentra 2.0 S","year":2012,"make":"Nissan","model":"Sentra","price":6175.0,"mileage":107200,"location":"Ridgecrest, CA","seller":"American Dream Auto Sales (Ed), 239 E Ridgecrest Blvd","seller_type":"dealer","source":"AutosToday","status":"passed","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/3N1AB6AP4CL772833/2012-nissan-sentra-2-0-s-cvt-ridgecrest-ca","vin":"3N1AB6AP4CL772833","rating":2,"notes":"Dealer stock #10337R1. $6,175, 107,200 mi, 2.0L, CVT, blue/gray. Clean title, ACCIDENT FREE, fleet history (AutoCheck).\nPrice 7% above market avg $5,796. Target ~$5,500.\nGood gas mileage (27 city), but this generation's CVT is the main risk.","electric":false,"mpg_city":27,"mpg_hwy":34,"mpg":30,"reliability":{"score":2,"summary":"Below average. The engine is fine and it gets 27 city / 34 hwy MPG, but 2007-2012 Sentras are known for CVT transmission failures - 'Power train' is the top NHTSA complaint (68 of 180) - and Nissan's extended CVT warranty has expired.","issues":["CVT (JF011E) whine, shudder, overheating 'limp mode' or failure - often $3,000-4,000","Ex-fleet: hard use, basic maintenance","Engine mount wear"],"checks":["Ask for CVT fluid change records (none = big risk)","Long test drive incl. a hill: no whine, slipping or rpm flare","Inspection with a CVT scan for stored codes","Dealer handles smog; ask about the 3-day return right (CARS Act)"]},"images":["images/17/00.jpg","images/17/01.jpg","images/17/02.jpg","images/17/03.jpg","images/17/04.jpg","images/17/05.jpg","images/17/06.jpg","images/17/07.jpg","images/17/08.jpg","images/17/09.jpg","images/17/10.jpg","images/17/11.jpg"]},{"id":18,"title":"2013 Chevrolet Impala LS","year":2013,"make":"Chevrolet","model":"Impala","price":6735.0,"mileage":126661,"location":"Ridgecrest, CA","seller":"American Dream Auto Sales (Ed), 239 E Ridgecrest Blvd","seller_type":"dealer","source":"AutosToday","status":"passed","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/2G1WA5E35D1182367/2013-chevrolet-impala-ls-ridgecrest-ca","vin":"2G1WA5E35D1182367","rating":3,"notes":"Dealer stock #11302. $6,735, 126,661 mi, 3.6L V6 flex-fuel, silver/gray. Clean title, ACCIDENT FREE, 2 owners, personal use.\nAutosToday 'Great buy': priced at market ($6,688 avg); dropped $3,260 since listing.\nComfortable and roomy, but 18 city MPG.","electric":false,"mpg_city":18,"mpg_hwy":30,"mpg":22,"reliability":{"score":3,"summary":"Average. The 3.6L V6 and 6-speed automatic are generally durable in this older-style Impala, and the price is fair. The most common complaint is a 'Service StabiliTrak/Traction' warning, and fuel economy is only 18 city.","issues":["'Service StabiliTrak' / traction-control warnings (108 of 272 complaints) - often throttle body or brake switch","Ignition key/switch recall (14V-355) - remove heavy key rings","Brake wear","Timing chain stretch on high-mileage 3.6L V6s"],"checks":["Any StabiliTrak or check-engine lights on the test drive?","Listen for a rattle at cold start (timing chain)","Run VIN: ignition recall done?","Ask about the 3-day return right (CARS Act)"]},"images":["images/18/00.jpg","images/18/01.jpg","images/18/02.jpg","images/18/03.jpg","images/18/04.jpg","images/18/05.jpg","images/18/06.jpg","images/18/07.jpg","images/18/08.jpg","images/18/09.jpg","images/18/10.jpg","images/18/11.jpg"]},{"id":19,"title":"2012 Honda Fit","year":2012,"make":"Honda","model":"Fit","price":5570.0,"mileage":165239,"location":"Bakersfield, CA","seller":"Car Bakers (dealer), Bakersfield","seller_type":"dealer","source":"CarGurus","status":"interested","url":"https://www.cargurus.com/details/455617380","vin":"JHMGE8H39CS000860","rating":4,"notes":"$5,570 incl. fees, 165,239 mi. CarGurus 'Great Deal'. Clean title, 1 previous owner, 1 accident reported (no damage reported). 75 days on CarGurus -> room to negotiate.\n~2 hr drive from Ridgecrest (CA-178). Confirm availability and get an out-the-door price by phone/text before driving.","electric":false,"mpg_city":28,"mpg_hwy":35,"mpg":31,"reliability":{"score":4,"summary":"Good. The 2009-2013 Fit with the 1.5L and a conventional 5-speed automatic (not a CVT) is one of the most dependable small cars of its era - same family as your 2018 Fit pick, for about half the price.","issues":["Ignition coil and A/C compressor failures at high miles","Engine mounts wear","Rear drum brakes / suspension wear at 165k"],"checks":["Ask what the reported accident was","A/C cold after 15 min","Service records (timing chain engine, but oil changes matter)","Run VIN for recalls (driver's window switch, airbag)"]},"images":["images/19/00.jpg","images/19/01.jpg","images/19/02.jpg","images/19/03.jpg","images/19/04.jpg","images/19/05.jpg","images/19/06.jpg","images/19/07.jpg"]},{"id":20,"title":"2006 Toyota Corolla CE (likely manual)","year":2006,"make":"Toyota","model":"Corolla","price":6471.0,"mileage":112173,"location":"Bakersfield, CA","seller":"Bakersfield dealer (CarGurus; only 1 dealer review, 1.0)","seller_type":"dealer","source":"CarGurus","status":"interested","url":"https://www.cargurus.com/details/462182322","vin":"1NXBR32E26Z669277","rating":4,"notes":"$6,321 (fees not disclosed), 112,173 mi. NO accidents reported, clean title, 2 previous owners.\nDealer has a single 1-star review on CarGurus - get an independent inspection and the full out-the-door price in writing.\n~2 hr drive from Ridgecrest (CA-178). Confirm availability and get an out-the-door price by phone/text before driving.\nAutosToday lists this Corolla as 'CE Manual' (natl) - likely a MANUAL transmission. Confirm with the dealer; you'd need to drive stick.\n2026-10-23: price went UP from $6,321 to $6,471 on CarGurus.","electric":false,"mpg_city":26,"mpg_hwy":34,"mpg":29,"reliability":{"score":4,"summary":"Good. The 9th-gen Corolla (2003-2008) with the 1.8L and 4-speed automatic is famously hard to kill, and this one has relatively low miles and a clean history.","issues":["Some 2005-2008 1.8L engines burn oil at high miles","Water pump and A/C wear","Basic, older safety equipment (side airbags optional)"],"checks":["Check the oil level and ask how often it's topped up","A/C cold after 15 min","Get dealer fees in writing (CarGurus says fees not disclosed)","Run VIN for Takata airbag recall completion"]},"images":["images/20/00.jpg","images/20/01.jpg","images/20/02.jpg","images/20/03.jpg","images/20/04.jpg"]},{"id":21,"title":"2009 Toyota Camry LE (115k mi)","year":2009,"make":"Toyota","model":"Camry","price":5800.0,"mileage":115000,"location":"Bakersfield, CA","seller":null,"seller_type":"private","source":"Craigslist","status":"passed","url":"https://www.craigslist.org/view/d/bakersfield-2009-toyota-camry-le/nyUZCqxCxyJwbyY15f4BTM","vin":"","rating":4,"notes":"$5,800, 115k mi, 4-cylinder, automatic. Clean title, tags until June 2027, 'smog check ready'. Condition listed 'like new'.\nCompare: the Ridgecrest 2009 Camry is $5,000 with 148k mi - this one has 33k fewer miles for $800 more.\n~2 hr drive from Ridgecrest (CA-178). Confirm availability and get an out-the-door price by phone/text before driving.","electric":false,"mpg_city":21,"mpg_hwy":31,"mpg":25,"reliability":{"score":4,"summary":"Good overall, with the same caveat as the Ridgecrest Camry: the 2007-2009 2.4L can burn oil, and dashboards get sticky in desert heat. Lower miles than the local one.","issues":["2.4L (2AZ-FE) oil consumption (2007-2009)","Sticky/melting dashboard in heat","Water pump leaks","Recalls: accelerator pedal/floor mat, power-window switch"],"checks":["Check oil level / blue smoke at startup","Seller provides the smog certificate","Inspect the dashboard","Run VIN for open recalls (free at Toyota dealers)"]},"images":["images/21/00.jpg","images/21/01.jpg","images/21/02.jpg","images/21/03.jpg","images/21/04.jpg","images/21/05.jpg"]},{"id":22,"title":"2018 Hyundai Elantra","year":2018,"make":"Hyundai","model":"Elantra","price":4900.0,"mileage":137000,"location":"Bakersfield, CA","seller":null,"seller_type":"private","source":"Craigslist","status":"interested","url":"https://www.craigslist.org/view/d/bakersfield-2018-hyundai-elantra-137k/6DexQBftyFLLtDXa22fVwC","vin":null,"rating":3,"notes":"$4,900, 137k mi, 2.0L 4-cyl, automatic. Clean title (seller stresses not salvage). Runs/drives great, 'fully loaded'; has dents, paint not great, cracked bumper.\nNewest car in this price range. Seller moving abroad -> may sell fast / negotiate.\n~2 hr drive from Ridgecrest (CA-178). Confirm availability and get an out-the-door price by phone/text before driving.","electric":false,"mpg_city":28,"mpg_hwy":37,"mpg":32,"reliability":{"score":3,"summary":"Average. The 2017-2020 Elantra's 2.0L 'Nu' engine and 6-speed automatic are generally solid and get about 37 MPG on the highway, but Hyundai's warranty transfers don't apply to used buyers, and this one shows cosmetic wear.","issues":["Some 2.0L Nu engines develop piston-slap/ticking or oil consumption at high miles","Cosmetic damage (dents, cracked bumper) - insurance/resale","Infotainment glitches"],"checks":["Listen for ticking/knocking at cold start","Check for a lit check-engine light and get a scan","Ask for a smog certificate (seller must provide)","Run VIN for recalls"]},"images":["images/22/00.jpg","images/22/01.jpg","images/22/02.jpg","images/22/03.jpg","images/22/04.jpg","images/22/05.jpg","images/22/06.jpg","images/22/07.jpg"]},{"id":23,"title":"2017 Hyundai Accent SE Hatchback","year":2017,"make":"Hyundai","model":"Accent","price":4983.0,"mileage":125925,"location":"Bakersfield, CA","seller":"Bakersfield dealer (CarGurus; only 1 dealer review, 1.0)","seller_type":"dealer","source":"CarGurus","status":"contacted","url":"https://www.cargurus.com/details/462182343","vin":"KMHCT5AE9HU300874","rating":4,"notes":"$4,833, 125,925 mi. NO accidents reported, clean title, 3 previous owners. ~31 MPG combined.\nSame dealer as the 2006 Corolla (1-star single review) - inspect and get out-the-door price in writing.\nCompare: the Ridgecrest 2016 Accent at American Dream is $8,735 with an accident on record.\n~2 hr drive from Ridgecrest (CA-178). Confirm availability and get an out-the-door price by phone/text before driving.\n2026-10-23: price went UP from $4,833 to $4,983 on CarGurus.","electric":false,"mpg_city":27,"mpg_hwy":37,"mpg":31,"reliability":{"score":4,"summary":"Good. Simple 1.6L with a 6-speed automatic (no CVT), cheap to insure and fix - and about $3,900 less than the Ridgecrest Accent, with no accidents reported.","issues":["1.6L GDI carbon buildup / oil consumption at high miles","Steering coupler clunk","3 owners - ask for service history"],"checks":["Check oil level","Steering: any clunk turning lock to lock","Get dealer fees in writing","Run VIN for recalls"]},"images":["images/23/00.jpg","images/23/01.jpg","images/23/02.jpg","images/23/03.jpg","images/23/04.jpg"]},{"id":24,"title":"2007 Honda Civic LX (64k mi)","year":2007,"make":"Honda","model":"Civic","price":7795.0,"mileage":63870,"location":"Bakersfield, CA","seller":"Approved Autos (dealer), Bakersfield","seller_type":"dealer","source":"CarGurus","status":"sold","url":"https://www.cargurus.com/details/459714852","vin":"1HGFA16537L086091","rating":3,"notes":"$7,795 incl. fees, ONLY 63,870 mi. CarGurus 'Great Deal'. Clean title, 2 previous owners, 1 accident reported (no damage reported). 29 days on CarGurus.\n~2 hr drive from Ridgecrest (CA-178). Confirm availability and get an out-the-door price by phone/text before driving.\nAlso listed on AutosToday at $7,740.\n2026-10-24: SOLD - CarGurus listing removed ('Looks like that one got away').\n2026-10-25: CarGurus still shows it gone, but AutosToday still lists it at $7,740 (listed 23 days). Possibly a stale feed - call the dealer before counting on it.\n2026-10-26: AutosToday now says 'No Longer Available' too (CarGurus removed it 10/24). Marked sold.","electric":false,"mpg_city":25,"mpg_hwy":36,"mpg":29,"reliability":{"score":3,"summary":"Average for this year, but the low miles help: the 2006-2009 1.8L Civic is known for cracked engine blocks (coolant loss/overheating), usually by ~80k miles - so this one is right in the window. Otherwise a durable, 36-MPG-highway car.","issues":["Cracked engine block (1.8L R18, 2006-09) - check coolant carefully","Peeling clear coat in sun","Rear tire wear (suspension geometry)","Takata airbag recalls"],"checks":["Coolant level and any crust near the block/thermostat; ask if the block was ever replaced","Run VIN: Takata airbag recalls done?","A/C cold","Ask what the reported accident was"]},"images":["images/24/00.jpg","images/24/01.jpg","images/24/02.jpg","images/24/03.jpg","images/24/04.jpg","images/24/05.jpg","images/24/06.jpg","images/24/07.jpg"]},{"id":25,"title":"2008 Toyota Prius Touring (hybrid)","year":2008,"make":"Toyota","model":"Prius","price":7999.0,"mileage":150000,"location":"Rosamond, CA","seller":"Rosamond Auto Sales, 2609 Sierra Hwy, Rosamond","seller_type":"dealer","source":"Craigslist","status":"interested","url":"https://www.craigslist.org/view/d/lancaster-2008-toyota-prius-touring/hQhXS5AiyFJtKtMj3cwFwJ","vin":null,"rating":3,"notes":"$7,999, 150k mi. Clean title, 'just passed California emission test', backup camera, GPS, trade-in. Dealer listing on Craigslist.\nBest fuel economy of anything in range: ~48 city MPG - roughly half the gas of a Camry.\n~1.5 hr drive from Ridgecrest (CA-14). Confirm availability by phone/text before driving.","electric":false,"mpg_city":48,"mpg_hwy":45,"mpg":46,"reliability":{"score":3,"summary":"The 2nd-gen Prius is one of the most reliable cars ever built, but this one is 18 years old: the main risk is the hybrid battery (a refurbished pack is roughly $1,500-3,000) and other age-related hybrid parts.","issues":["Hybrid battery capacity loss with age","Brake actuator / ABS pump failure (expensive)","Combination meter (dash display) failure","Some 1.5L engines burn oil; EGR clogging at high miles"],"checks":["Hybrid battery health test at an independent hybrid shop (worth paying for)","No warning lights (triangle / ABS / check engine)","Dash display works","Ask the dealer what the 3-day return terms are (CARS Act)"]},"images":["images/25/00.jpg","images/25/01.jpg","images/25/02.jpg","images/25/03.jpg","images/25/04.jpg","images/25/05.jpg","images/25/06.jpg","images/25/07.jpg"]},{"id":26,"title":"2006 Toyota Prius (hybrid)","year":2006,"make":"Toyota","model":"Prius","price":4300.0,"mileage":143000,"location":"Bakersfield, CA","seller":null,"seller_type":"private","source":"Facebook Marketplace","status":"contacted","url":"https://www.facebook.com/marketplace/item/1581711653596876/","vin":"","rating":3,"notes":"$4,300, 143k mi. Clean title in hand, smog done, no check-engine light, A/C/heat, cruise. Listed ~9 weeks.\nOne seller review says they were ghosted after a long drive - confirm by phone the day you go.\n~48 city MPG for $4,300 - the cheapest way to low gas costs on this list.\n~2 hr drive from Ridgecrest (CA-178). Confirm availability and get an out-the-door price by phone/text before driving.","electric":false,"mpg_city":48,"mpg_hwy":45,"mpg":46,"reliability":{"score":3,"summary":"Same as the 2008: an excellent design, but at 20 years old the hybrid battery and brake actuator are the big-ticket risks. Priced low enough to leave room for a battery if needed.","issues":["Hybrid battery capacity loss with age","Brake actuator / ABS pump failure","Combination meter failure","Oil consumption / EGR at high miles"],"checks":["Hybrid battery health test before buying","No triangle/ABS/check-engine lights","Confirm the smog certificate date","Confirm availability by phone before the 2-hour drive"]},"images":["images/26/00.jpg","images/26/01.jpg","images/26/02.jpg","images/26/03.jpg","images/26/04.jpg"]},{"id":27,"title":"2011 Mazda3 i (94k mi)","year":2011,"make":"Mazda","model":"Mazda3","price":7999.0,"mileage":94065,"location":"Bakersfield, CA","seller":"Carnomic (dealer), Bakersfield","seller_type":"dealer","source":"AutosToday","status":"interested","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/JM1BL1UG4B1478092/2011-mazda-cx-3-sport-auto-i-4-door-bakersfield-ca","vin":"JM1BL1UG4B1478092","rating":4,"notes":"$7,999, 94,065 mi, automatic. AutoCheck via AutosToday: clean title, ACCIDENT FREE, multiple owners, lease history. Listed 203 days -> strong negotiating position (target ~$7,000).\nAutosToday mislabels it '2011 Mazda CX-3' - the VIN (JM1BL...) is a 2011 Mazda3; confirm sedan vs hatchback. No photos posted - ask the dealer for photos before driving.\n~2 hr drive from Ridgecrest (CA-178). Call/text first to confirm availability and get the out-the-door price.","electric":false,"mpg_city":24,"mpg_hwy":33,"mpg":27,"reliability":{"score":4,"summary":"Good. The 1st-gen Mazda3 (2010-2013) with the 2.0L and 5-speed automatic is a dependable, simple compact - and this one has low miles and no accidents. Not as frugal as the newer Skyactiv Mazda3, but cheap to run.","issues":["Engine mounts wear (vibration at idle)","Clear-coat / sun-faded paint and cracked dash in desert heat","A/C and power steering pump issues reported at higher miles","Ignition coil failures"],"checks":["Ask for photos and the VIN-confirmed body style","Vibration at idle in Drive (motor mounts)","A/C cold after 15 min","Run VIN for recalls"]},"images":[]},{"id":28,"title":"2008 Toyota Camry Hybrid","year":2008,"make":"Toyota","model":"Camry","price":7900.0,"mileage":140000,"location":"Lancaster, CA","seller":"Atlantic Auto Sales And Finance (dealer), Lancaster","seller_type":"dealer","source":"AutosToday","status":"interested","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/JTNBB46K383048472/2008-toyota-camry-2-4-auto-hybrid-lancaster-ca","vin":"JTNBB46K383048472","rating":3,"notes":"$7,900, 140k mi. AutoCheck via AutosToday: clean title, ACCIDENT FREE, multiple owners, personal use. Listed 184 days -> negotiate.\n~1.5 hr drive from Ridgecrest (CA-14). Call/text first to confirm availability and get the out-the-door price.","electric":false,"mpg_city":33,"mpg_hwy":34,"mpg":34,"reliability":{"score":3,"summary":"Average given its age: the Camry Hybrid's drivetrain is durable, but at 18 years the hybrid battery is the big risk (refurbished pack roughly $1,500-3,000), and the 2007-2009 Camrys share the sticky-dashboard problem.","issues":["Hybrid battery capacity loss with age","Inverter coolant pump failure (hybrid system warning)","Sticky/melting dashboard in heat","Brake actuator wear"],"checks":["Hybrid battery health test at an independent hybrid shop","No hybrid-system, check-engine or ABS warnings","A/C cold (electric compressor)","Run VIN for recalls (floor mat/accelerator, window switch)"]},"images":["images/28/00.jpg","images/28/01.jpg","images/28/02.jpg","images/28/03.jpg","images/28/04.jpg"]},{"id":29,"title":"2010 Hyundai Elantra Touring GLS (wagon)","year":2010,"make":"Hyundai","model":"Elantra","price":4700.0,"mileage":161407,"location":"Lancaster, CA","seller":"Atlantic Auto Sales And Finance (dealer), Lancaster","seller_type":"dealer","source":"AutosToday","status":"passed","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/KMHDC8AEXAU063338/2010-hyundai-elantra-touring-gls-a-t-lancaster-ca","vin":"KMHDC8AEXAU063338","rating":3,"notes":"$4,700, 161k mi, automatic. AutoCheck via AutosToday: clean title, ACCIDENT FREE, SINGLE OWNER, personal use. Listed 138 days -> negotiate.\nSmall wagon: lots of cargo room for deliveries.\n~1.5 hr drive from Ridgecrest (CA-14). Call/text first to confirm availability and get the out-the-door price.","electric":false,"mpg_city":23,"mpg_hwy":31,"mpg":26,"reliability":{"score":3,"summary":"Average. The Elantra Touring's 2.0L and 4-speed automatic are simple and long-lived, and a one-owner, no-accident history helps - but at 161k expect wear items, and it's thirstier (23 city) than the newer small cars.","issues":["Timing belt due every ~60k (ask for records)","Engine mounts and suspension bushings","Clock spring / steering-wheel button failures","A/C compressor wear"],"checks":["Timing belt replacement records","Check for warning lights and suspension clunks","A/C cold","Run VIN for recalls"]},"images":["images/29/00.jpg","images/29/01.jpg","images/29/02.jpg","images/29/03.jpg","images/29/04.jpg"]},{"id":30,"title":"2013 Honda Civic HF","year":2013,"make":"Honda","model":"Civic","price":8000.0,"mileage":140000,"location":"Palmdale, CA","seller":null,"seller_type":"private","source":"Craigslist","status":"interested","url":"https://www.craigslist.org/view/d/palmdale-2013-honda-civic-hf-not-hybrid/wTvivNFGaXfD9iZcTfs4uh","vin":null,"rating":0,"notes":"$8,000 cash only, ~140k mi, automatic, clean title (per ad), backup camera, new tires. Found 2026-10-23.\nHF = the high-fuel-economy Civic (aero wheels/underbody): EPA 29 city / 41 hwy / 33 combined - best highway MPG on the list.\nAd is keyword-stuffed and cash-only, so it may be a flipper: make sure the title is in the seller's name, get the VIN and run it, and pre-purchase inspect. Top of budget - try to negotiate.","electric":false,"mpg_city":29,"mpg_hwy":41,"mpg":33,"reliability":{"score":4,"summary":"The 2013 Civic (1.8L R18, 5-speed auto) is one of the more reliable used compacts; 2013 fixed most of the 2012 redesign complaints. At 140k it needs its maintenance history checked.","issues":["A/C compressor / condenser failures","Engine mount wear (vibration at idle)","Valve adjustment due ~100-110k if never done","Takata airbag recall - confirm completed"],"checks":["Title in seller's name and matches VIN","Run VIN for recalls (Takata)","A/C cold at idle in heat","Vibration at idle in Drive (mounts)","Ask for valve adjustment / transmission fluid service records"]},"images":["images/30/00.jpg","images/30/01.jpg","images/30/02.jpg","images/30/03.jpg","images/30/04.jpg","images/30/05.jpg","images/30/06.jpg","images/30/07.jpg"]},{"id":31,"title":"2004 Toyota Matrix","year":2004,"make":"Toyota","model":"Matrix","price":3800.0,"mileage":168000,"location":"Palmdale, CA","seller":null,"seller_type":"private","source":"Craigslist","status":"interested","url":"https://www.craigslist.org/view/d/palmdale-vehicle-for-sale/fDyPgztoaf5UbqhzRrJTjk","vin":null,"rating":0,"notes":"$3,800, 168k mi, automatic, FWD, clean title, blue. Posted 2026-10-21. Owner says well maintained (regular oil changes), brakes and water pump replaced ~7 months ago, straight body, good interior; tires are 'OK' but they suggest replacing. Tags due November - seller will keep them current. Stopped driving it after buying a bigger vehicle.\nA Corolla underneath, with a hatchback that fits big catering orders. ~1.5 hr drive from Ridgecrest - text first. Budget ~$400-600 for tires.","electric":false,"mpg_city":25,"mpg_hwy":31,"mpg":27,"reliability":{"score":4,"summary":"Toyota Matrix = Corolla mechanicals (1.8L 1ZZ-FE, 4-speed auto): among the most durable cheap commuters. Main watch-item on 2003-04 is oil consumption from the piston rings.","issues":["Oil burning on some 1ZZ-FE engines (2003-04)","Sagging/worn engine mounts","Takata airbag recall (passenger) - confirm done","Rear hatch struts and A/C wear with age"],"checks":["Pull dipstick - full and clean? Ask how often they add oil","Blue smoke on cold start","Run VIN for open Takata recall","Tire date codes / tread","A/C cold in Palmdale heat"]},"images":["images/31/00.jpg","images/31/01.jpg","images/31/02.jpg","images/31/03.jpg","images/31/04.jpg","images/31/05.jpg"]},{"id":32,"title":"2009 Toyota Prius","year":2009,"make":"Toyota","model":"Prius","price":2395.0,"mileage":172000,"location":"Littlerock, CA","seller":null,"seller_type":"private","source":"Craigslist","status":"interested","url":"https://www.craigslist.org/view/d/littlerock-2009-toyota-prius-gets-over/pg2qbeMD2MhUAimoAovSmU","vin":null,"rating":0,"notes":"$2,395 'first $2,395 gets it', 172k mi, clean title, cold A/C, no hybrid-battery or warning lights per seller. Minor body imperfections. Posted 2026-10-12 - call to confirm it's still there (phone only, no texts).\nREGISTRATION IS PAST DUE: ask the amount - CA back fees/penalties transfer to the buyer, so subtract them from your offer. Seller must provide a smog certificate.\nCheapest way onto a 46 MPG car: even if the hybrid battery needs a refurbished pack ($1,500-3,000), the total stays under the $4,300 Bakersfield Prius. Get a hybrid battery health test (Dr. Prius app + OBD dongle, or a hybrid shop) before paying.","electric":false,"mpg_city":48,"mpg_hwy":45,"mpg":46,"reliability":{"score":3,"summary":"Gen-2 Prius drivetrain is very durable, but at 172k the original hybrid battery is near the end of its typical life, and the price reflects that.","issues":["Hybrid battery degradation (~150-200k)","Inverter coolant pump failure","Burning oil / head gasket on high-mileage 1NZ-FXE","Combination meter (dash display) going dark","Brake actuator failure"],"checks":["Hybrid battery test (Dr. Prius life test)","Watch dash for triangle warning / 'check hybrid system'","Inverter coolant pump running (listen at hood with car READY)","Oil level","Registration back-fee amount and smog certificate"]},"images":["images/32/00.jpg","images/32/01.jpg","images/32/02.jpg","images/32/03.jpg"]},{"id":33,"title":"2013 Kia Rio LX","year":2013,"make":"Kia","model":"Rio","price":4500.0,"mileage":152000,"location":"Lancaster, CA","seller":null,"seller_type":"private","source":"Craigslist","status":"sold","url":"https://www.craigslist.org/view/d/lancaster-2013-kia-rio-lx-dependable/q2mR24cik3nAuNK9G32E9a","vin":null,"rating":0,"notes":"$4,500, 152k mi, automatic sedan, black. Clean title IN THE SELLER'S NAME, tags good until April 2027. New tires, new catalytic converter (has receipt), 'no leaks, no mechanical issues', minor door dings. Posted 2026-09-24, renewed 2026-10-10.\nText only (number in the ad), Mon-Fri 10am-6:30pm. ~1.5 hr drive from Ridgecrest - confirm before going.\n2026-10-25: LISTING DELETED on Craigslist (the ad said it would come down when sold) - likely sold.","electric":false,"mpg_city":28,"mpg_hwy":36,"mpg":31,"reliability":{"score":3,"summary":"The 2012-17 Rio (1.6L GDI, 6-speed automatic) is an average-to-good small car: simple, cheap parts, not part of the Hyundai/Kia Theta II engine recalls. High miles mean maintenance history matters.","issues":["Carbon buildup on direct-injected 1.6L (rough idle, misfires at high miles)","Oil consumption if oil changes were stretched","Brake light switch (recall)","A/C condenser / compressor wear"],"checks":["Smooth idle, no check-engine light (scan for stored codes)","Oil level and color","Run VIN for open recalls","A/C cold","Shifts smoothly 1-6 with no flare"]},"images":["images/33/00.jpg","images/33/01.jpg","images/33/02.jpg","images/33/03.jpg","images/33/04.jpg","images/33/05.jpg","images/33/06.jpg","images/33/07.jpg","images/33/08.jpg"]},{"id":34,"title":"2012 Honda Civic Hybrid","year":2012,"make":"Honda","model":"Civic","price":5542.0,"mileage":173579,"location":"Bakersfield, CA","seller":"Compas Auto Sales (3.7 stars, 151 reviews)","seller_type":"dealer","source":"AutosToday","status":"interested","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/JHMFB4F25CS001995/2012-honda-civic-hybrid-cvt-bakersfield-ca","vin":"JHMFB4F25CS001995","rating":0,"notes":"$5,542 (about $6,329 out the door with fees), 173,579 mi. AutoCheck: clean title, accident-free, 1 previous owner, personal use. AutosToday: 24% below market (avg $7,271), 'Great buy'. Listed 2026-10-24.\n44 MPG city/highway on regular gas - close to a Prius for DoorDash.\nTHE CATCH: the hybrid battery. 2012 was the first year Honda used a lithium-ion pack (more durable than the 2006-11 packs that failed a lot), but at 173k get a hybrid battery health check and ask if it was ever replaced. A new pack is roughly $3,000-4,000.\nDealer also has a 2005 Accord LX ($5,100, 127k) and 2006 Accord EX ($6,288, 143k) as non-hybrid backups (no history report shown for those).","electric":false,"mpg_city":44,"mpg_hwy":44,"mpg":44,"reliability":{"score":3,"summary":"The 9th-gen (2012-15) Civic Hybrid's 1.5L engine and CVT are generally solid and it switched to a lithium-ion battery. Mileage puts the battery and CVT near the point where they need checking.","issues":["Hybrid (IMA) battery wear at high mileage","CVT judder or slipping","A/C compressor","12-volt battery drain"],"checks":["Hybrid battery health test; ask about IMA/battery history","No IMA or check-engine lights; scan for stored codes","CVT smooth from a stop, no shudder","A/C cold","Run VIN for open recalls"]},"images":[]},{"id":35,"title":"2020 Tesla Model 3 Standard Range Plus","year":2020,"make":"Tesla","model":"Model 3","price":19995.0,"mileage":109900,"location":"Lancaster, CA","seller":"Emanuel Motors LLC (4.5 stars, 23 reviews)","seller_type":"dealer","source":"AutosToday","status":"passed","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/5YJ3E1EA0LF706400/2020-tesla-model-3-standard-range-plus-lancaster-ca","vin":"5YJ3E1EA0LF706400","rating":0,"notes":"$19,995 (about $21,830 out the door), 109,900 mi. AutoCheck: clean title, accident-free, multiple owners, personal use. 7% below market.\nCHEAPEST clean Model 3 nearby. BUT it is past the 100,000-mile battery & drive-unit warranty (8 yr/100k on Standard Range Plus), so a battery or drive-unit failure would be on you. Get a battery health check before buying.\nSame dealer also has a 2018 Long Range ($18,995, 116k, ex-fleet) and a 2020 Performance ($20,995, 116k, 1 owner).\nELECTRIC: the MPG shown is gas-equivalent - Supercharger charging (~$0.48/kWh) costs about what a 45-MPG car would at $6/gal. Charging at home (~$0.33/kWh) would be cheaper, like a ~65-MPG car. Ridgecrest has a Tesla Supercharger.\nInsurance estimate uses an EV class (about 1.6x a regular sedan) because Tesla body and battery repairs are expensive - get a real quote.\nNo oil changes; the main running cost is tires (Teslas wear them fast, ~$800-1,200 a set).","electric":true,"mpg_city":45,"mpg_hwy":null,"mpg":45,"reliability":{"score":3,"summary":"Model 3 drivetrains are generally durable and there's no engine or transmission to fail, but this one is past its battery/drive-unit warranty at 110k, and Teslas have more build-quality and electronics issues than Toyota/Honda.","issues":["Out of battery & drive-unit warranty (100k miles)","Front control arm / suspension clunks","Door handles, window regulators, touchscreen (MCU) faults","Fast tire wear","Pricey collision repairs"],"checks":["Battery health: in the car, check the range at 100% charge (Energy app or ask the dealer for a battery report)","Confirm the remaining battery warranty date/mileage with Tesla (VIN lookup)","Run VIN for open recalls; check for Tesla software updates","Tires: tread depth and matching set","Check the 12V/low-voltage battery and that the charge port opens and charges","Ask if Supercharging is pay-per-use (it will be) and whether a mobile/wall charger comes with it"]},"images":["images/35/00.jpg","images/35/01.jpg","images/35/02.jpg","images/35/03.jpg","images/35/04.jpg","images/35/05.jpg","images/35/06.jpg"]},{"id":36,"title":"2022 Tesla Model 3 Long Range AWD","year":2022,"make":"Tesla","model":"Model 3","price":25172.0,"mileage":72815,"location":"Palmdale, CA","seller":"AV GMC (4.4 stars, 1,341 reviews)","seller_type":"dealer","source":"AutosToday","status":"passed","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/5YJ3E1EB6NF139296/2022-tesla-model-3-long-range-dual-motor-awd-palmdale-ca","vin":"5YJ3E1EB6NF139296","rating":0,"notes":"$25,172 (about $27,382 out the door), 72,815 mi. AutoCheck: clean title, accident-free, SINGLE owner, personal use. 10% below market - AutosToday's best-rated Model 3 deal nearby (8.6/10).\nLong Range = ~300+ miles of range and battery/drive-unit warranty to 8 years/120,000 miles, so roughly 47,000 miles (~3 years of DoorDash) of coverage left.\nNo photos online yet (dealer placeholder only).\nELECTRIC: the MPG shown is gas-equivalent - Supercharger charging (~$0.48/kWh) costs about what a 42-MPG car would at $6/gal. Charging at home (~$0.33/kWh) would be cheaper, like a ~62-MPG car. Ridgecrest has a Tesla Supercharger.\nInsurance estimate uses an EV class (about 1.6x a regular sedan) because Tesla body and battery repairs are expensive - get a real quote.\nNo oil changes; the main running cost is tires (Teslas wear them fast, ~$800-1,200 a set).","electric":true,"mpg_city":42,"mpg_hwy":null,"mpg":42,"reliability":{"score":4,"summary":"Newer, single-owner, accident-free, and still under battery/drive-unit warranty - the lowest-risk Model 3 under ~$26k here. Long Range AWD uses a little more energy than RWD.","issues":["Front control arm / suspension clunks","Door handles, window regulators, touchscreen faults","Fast tire wear","Pricey collision repairs"],"checks":["Battery health: in the car, check the range at 100% charge (Energy app or ask the dealer for a battery report)","Confirm the remaining battery warranty date/mileage with Tesla (VIN lookup)","Run VIN for open recalls; check for Tesla software updates","Tires: tread depth and matching set","Check the 12V/low-voltage battery and that the charge port opens and charges","Ask if Supercharging is pay-per-use (it will be) and whether a mobile/wall charger comes with it"]},"images":[]},{"id":37,"title":"2023 Tesla Model 3 RWD","year":2023,"make":"Tesla","model":"Model 3","price":28262.0,"mileage":31376,"location":"Bakersfield, CA","seller":"Audi Bakersfield (4.4 stars, 258 reviews)","seller_type":"dealer","source":"AutosToday","status":"passed","url":"https://www.autostoday.com/cars-for-sale/used-cars/listing/5YJ3E1EA7PF656682/2023-tesla-model-3-base-bakersfield-ca","vin":"5YJ3E1EA7PF656682","rating":0,"notes":"$28,262 (about $30,696 out the door), 31,376 mi. AutoCheck: clean title, accident-free, single owner (lease return). About market price (2% above).\nLowest-mileage Model 3 under $30k nearby. 2023 RWD uses an LFP battery that tolerates charging to 100% daily; battery warranty runs to about 2031 / 100,000 miles (~69,000 miles left).\nELECTRIC: the MPG shown is gas-equivalent - Supercharger charging (~$0.48/kWh) costs about what a 46-MPG car would at $6/gal. Charging at home (~$0.33/kWh) would be cheaper, like a ~67-MPG car. Ridgecrest has a Tesla Supercharger.\nInsurance estimate uses an EV class (about 1.6x a regular sedan) because Tesla body and battery repairs are expensive - get a real quote.\nNo oil changes; the main running cost is tires (Teslas wear them fast, ~$800-1,200 a set).","electric":true,"mpg_city":46,"mpg_hwy":null,"mpg":46,"reliability":{"score":4,"summary":"Low miles, one owner, no accidents, and years of battery/drive-unit warranty left. The most efficient Model 3 version.","issues":["Fast tire wear","Touchscreen/door-handle faults","Pricey collision repairs","Shorter range than Long Range (~270 mi when new)"],"checks":["Battery health: in the car, check the range at 100% charge (Energy app or ask the dealer for a battery report)","Confirm the remaining battery warranty date/mileage with Tesla (VIN lookup)","Run VIN for open recalls; check for Tesla software updates","Tires: tread depth and matching set","Check the 12V/low-voltage battery and that the charge port opens and charges","Ask if Supercharging is pay-per-use (it will be) and whether a mobile/wall charger comes with it"]},"images":["images/37/00.jpg","images/37/01.jpg","images/37/02.jpg","images/37/03.jpg","images/37/04.jpg"]}]}</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-const { cars } = JSON.parse(document.getElementById("data").textContent);
-const $ = (s) => document.querySelector(s);
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const money = (n) => (n ? n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }) : "–");
-const STATUS = { interested: ["Interested", "secondary"], contacted: ["Contacted seller", "info"], "test-driven": ["Test driven", "info"],
-  inspected: ["Inspected", "primary"], negotiating: ["Negotiating", "warning"], bought: ["Bought", "success"],
-  passed: ["Passed", "dark"], sold: ["Sold (gone)", "dark"] };
-const SRC = { "Facebook Marketplace": ["fa-brands fa-facebook", "text-bg-fb"], Craigslist: ["fa-solid fa-list-ul", "text-bg-secondary"],
-  CarGurus: ["fa-solid fa-car-side", "text-bg-dark"], AutosToday: ["fa-solid fa-earth-americas", "text-bg-info"] };
-const REL = ["Unknown", "Poor", "Below average", "Average", "Good", "Excellent"];
-const RELC = ["secondary", "danger", "danger", "warning", "success", "success"];
-const mpgOf = (c) => c.mpg_city || c.mpg || 0;
-
-function mpgLine(c) {
-  const m = mpgOf(c);
-  if (!m) return "";
-  if (c.electric) return `<div class="small"><span class="badge text-bg-success me-1"><i class="fa-solid fa-bolt"></i></span>Electric · costs like a <b>${m}</b> MPG car</div>`;
-  const color = m >= 30 ? "success" : m >= 24 ? "warning" : "danger";
-  const parts = [c.mpg_city && `<b>${c.mpg_city}</b> city`, c.mpg_hwy && `<b>${c.mpg_hwy}</b> hwy`, c.mpg && `<b>${c.mpg}</b> combined`].filter(Boolean).join(" · ");
-  return `<div class="small"><span class="badge text-bg-${color} me-1"><i class="fa-solid fa-gas-pump"></i></span>${parts} MPG</div>`;
-}
-
-function card(c) {
-  const [stLabel, stColor] = STATUS[c.status] || [c.status, "secondary"];
-  const [srcIcon, srcCls] = SRC[c.source] || ["fa-solid fa-link", "text-bg-secondary"];
-  const r = c.reliability || {}, s = r.score || 0;
-  const list = (t, xs) => (xs && xs.length ? `<div class="fw-semibold mt-2">${t}</div><ul class="mb-0 ps-3">${xs.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : "");
-  const photo = c.images.length
-    ? `<button class="car-photo ratio ratio-4x3 card-img-top border-0 p-0" data-photos="${c.id}" aria-label="View ${c.images.length} photos">
-         <img src="${c.images[0]}" alt="${esc(c.title)}" loading="lazy" class="w-100 h-100">
-         <span class="badge text-bg-dark bg-opacity-75 position-absolute" style="right:.5rem;bottom:.5rem;top:auto;left:auto;width:auto;height:auto"><i class="fa-solid fa-camera me-1"></i>${c.images.length}</span></button>`
-    : `<div class="ratio ratio-4x3 card-img-top bg-body-secondary"><div class="d-flex align-items-center justify-content-center text-body-tertiary flex-column"><i class="fa-solid fa-image fs-1"></i><span class="small mt-1">No photos yet</span></div></div>`;
-  return `<div class="col"><div class="card h-100 car-card status-${esc(c.status)}">${photo}
-    <div class="card-body d-flex flex-column gap-2">
-      <div class="d-flex flex-wrap gap-1"><span class="badge ${srcCls}"><i class="${srcIcon} me-1"></i>${esc(c.source)}</span>
-        <span class="badge text-bg-${stColor}">${esc(stLabel)}</span></div>
-      <h2 class="h6 mb-0">${esc(c.title)}</h2>
-      <div class="row g-0 text-center border rounded bg-body-tertiary py-1">
-        <div class="col"><div class="fw-bold">${money(c.price)}</div><div class="small text-body-secondary">price</div></div>
-        <div class="col border-start"><div class="fw-bold">${c.mileage ? c.mileage.toLocaleString() : "–"}</div><div class="small text-body-secondary">miles</div></div>
-      </div>
-      ${mpgLine(c)}
-      <div class="small text-body-secondary"><i class="fa-solid fa-location-dot me-1"></i>${esc([c.seller, c.seller_type === "private" ? "private seller" : "dealer", c.location].filter(Boolean).join(" · "))}</div>
-      <details class="small border rounded px-2 py-1"><summary><span class="text-uppercase text-body-secondary" style="font-size:.7rem">Reliability</span>
-        <span class="text-${RELC[s]} ms-1">${"●".repeat(s)}${"○".repeat(5 - s)}</span> <b>${REL[s]}</b></summary>
-        <p class="mb-0 mt-1">${esc(r.summary)}</p>${list("Known issues", r.issues)}${list("Check before buying", r.checks)}</details>
-      ${c.notes ? `<details class="small border rounded px-2 py-1"><summary>Notes</summary><div class="mt-1" style="white-space:pre-wrap">${esc(c.notes)}</div></details>` : ""}
-      ${c.url ? `<a class="btn btn-sm btn-outline-primary mt-auto align-self-start" href="${esc(c.url)}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>View listing</a>` : ""}
-    </div></div></div>`;
-}
-
-function render() {
-  const f = $("#f-status").value, sort = $("#f-sort").value;
-  let list = cars.filter((c) => (f === "active" ? !["sold", "passed"].includes(c.status) : !f || c.status === f));
-  const key = { price: (c) => c.price || 1e9, mpg: (c) => -mpgOf(c), rel: (c) => -(c.reliability?.score || 0), miles: (c) => c.mileage || 1e9 }[sort];
-  list.sort((a, b) => key(a) - key(b));
-  $("#count").textContent = `${list.length} car${list.length === 1 ? "" : "s"}`;
-  $("#cars").innerHTML = list.map(card).join("") || `<div class="col-12 text-body-secondary">No cars here.</div>`;
-}
-$("#f-status").addEventListener("change", render);
-$("#f-sort").addEventListener("change", render);
-
-const photoModal = new bootstrap.Modal("#photo-modal");
-document.addEventListener("click", (e) => {
-  const id = e.target.closest("[data-photos]")?.dataset.photos;
-  if (!id) return;
-  const c = cars.find((x) => String(x.id) === id);
-  $("#photo-title").textContent = c.title;
-  $("#photo-carousel .carousel-inner").innerHTML = c.images.map((src, i) =>
-    `<div class="carousel-item${i ? "" : " active"}"><img src="${src}" alt="${esc(c.title)} photo ${i + 1}"></div>`).join("");
-  photoModal.show();
-});
-render();
-</script>
+<script src="static/snapshot-shim.js"></script>
+<script src="static/app.js"></script>
 </body>
 </html>
