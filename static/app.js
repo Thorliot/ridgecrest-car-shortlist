@@ -252,6 +252,9 @@ const statusLabel = Object.fromEntries(STATUSES.map(([v, l]) => [v, l]));
 const statusColor = Object.fromEntries(STATUSES.map(([v, , c]) => [v, c]));
 $('#car-form [name="status"]').innerHTML = STATUSES.map(([v, l]) => `<option value="${v}">${l}</option>`).join("");
 $("#filter-status").innerHTML += STATUSES.map(([v, l]) => `<option value="${v}">${l}</option>`).join("");
+// "Available only" (the default) hides cars you passed on and ones that sold to someone else.
+const GONE = ["passed", "sold"];
+try { const f = localStorage.getItem("statusFilter"); if (f !== null && $(`#filter-status option[value="${f}"]`)) $("#filter-status").value = f; } catch {}
 
 let cars = [];
 const selected = new Set();
@@ -385,6 +388,7 @@ async function loadCars() {
   renderCars();
   renderHome();
   renderBudget();
+  renderGoFundMe();
   if (!loadCars.autoSaved) { loadCars.autoSaved = true; setTimeout(autoSaveForOffline, 3000); }
 }
 
@@ -394,7 +398,8 @@ function renderCars() {
   const f = $("#filter-status").value;
   const src = $("#filter-source").value;
   const sort = $("#sort-by").value;
-  let list = cars.filter((c) => (!f || c.status === f) && (!src || carSource(c) === src));
+  const statusOk = (c) => !f || (f === "available" ? !GONE.includes(c.status) : c.status === f);
+  let list = cars.filter((c) => statusOk(c) && (!src || carSource(c) === src));
   const num = (v, d) => (v == null ? d : v);
   if (sort === "price") list.sort((a, b) => num(a.price, 1e12) - num(b.price, 1e12));
   if (sort === "mileage") list.sort((a, b) => num(a.mileage, 1e12) - num(b.mileage, 1e12));
@@ -566,7 +571,10 @@ function relBlock(c) {
     </div></div>`;
 }
 
-$("#filter-status").addEventListener("change", renderCars);
+$("#filter-status").addEventListener("change", () => {
+  try { localStorage.setItem("statusFilter", $("#filter-status").value); } catch {}
+  renderCars();
+});
 $("#filter-source").addEventListener("change", renderCars);
 $("#sort-by").addEventListener("change", renderCars);
 
@@ -1206,6 +1214,111 @@ $("#budget-extra").addEventListener("keydown", (e) => { if (e.key === "Enter") {
 $$('[name="budget-period"]').forEach((r) => r.addEventListener("change", renderBudgetTable));
 $$('[name="budget-basis"]').forEach((r) => r.addEventListener("change", renderBudgetSchedule));
 
+/* ---------------- GoFundMe ---------------- */
+// GoFundMe personal fundraisers (US): no platform fee; 2.9% + $0.30 comes out of each donation.
+const GFM_PCT = 0.029;
+const GFM_FIXED = 0.30;
+let gfmData = null;
+let gfmCarId = null;
+(function restoreGoFundMe() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("gofundme") || "{}");
+    for (const [k, v] of Object.entries(saved)) {
+      const el = $("#gfm-form").elements[k];
+      if (el) el.type === "checkbox" ? (el.checked = v) : (el.value = v);
+    }
+    gfmCarId = +saved.car || null;
+  } catch {}
+})();
+
+function gfmInputs() {
+  const f = $("#gfm-form").elements;
+  const n = (name, d = 0) => { const v = parseFloat(f[name].value); return isFinite(v) && v >= 0 ? v : d; };
+  return { basis: f.basis.value, dmv: f.dmv.checked, inspect: n("inspect"), insMonths: Math.round(n("insMonths")),
+    cushion: n("cushion"), have: n("have"), avg: Math.max(5, n("avg", 50)) };
+}
+// Fees on `goal` raised in gifts of about `avg`: 2.9% of everything plus $0.30 per donation.
+function gfmFees(goal, avg) {
+  const donations = Math.ceil(goal / avg);
+  return { donations, pctFee: goal * GFM_PCT, fixedFee: donations * GFM_FIXED, fees: goal * GFM_PCT + donations * GFM_FIXED };
+}
+// Smallest goal (rounded up to $50) whose take-home after fees still covers `need`.
+function gfmGoal(need, avg) {
+  if (need <= 0) return { goal: 0, donations: 0, pctFee: 0, fixedFee: 0, fees: 0, net: 0 };
+  let goal = Math.ceil(need / (1 - GFM_PCT - GFM_FIXED / avg) / 50) * 50;
+  let f = gfmFees(goal, avg);
+  while (goal - f.fees < need) f = gfmFees((goal += 50), avg);
+  return { goal, ...f, net: goal - f.fees };
+}
+function gfmRow(c, inp, taxRate) {
+  const price = inp.basis === "asking" ? c.price : c.target;
+  const items = [[`Car (${inp.basis === "asking" ? "asking" : "target"} price)`, price], [`Sales tax (${taxRate}%)`, price * taxRate / 100]];
+  if (inp.dmv) items.push(["DMV transfer & registration", c.dmv_once]);
+  const extras = [];
+  if (inp.inspect) extras.push(["Pre-purchase inspection", inp.inspect]);
+  if (inp.insMonths) extras.push([`Insurance, ${inp.insMonths} month${inp.insMonths === 1 ? "" : "s"} × ${money(c.insurance_monthly)}`, inp.insMonths * c.insurance_monthly]);
+  if (inp.cushion) extras.push(["Repair cushion", inp.cushion]);
+  const sum = (xs) => xs.reduce((t, [, v]) => t + v, 0);
+  const buy = sum(items);
+  const extra = sum(extras);
+  const need = Math.max(0, Math.round(buy + extra - inp.have));
+  return { c, items, extras, buy, extra, need, ...gfmGoal(need, inp.avg) };
+}
+
+async function renderGoFundMe() {
+  try { gfmData = await api("/api/gofundme"); }
+  catch (e) { $("#gfm-table").innerHTML = `<tr><td colspan="7" class="text-danger">${esc(e.message)}</td></tr>`; return; }
+  drawGoFundMe();
+}
+function drawGoFundMe() {
+  if (!gfmData) return;
+  const inp = gfmInputs();
+  const rows = gfmData.cars.map((c) => gfmRow(c, inp, gfmData.tax_rate)).sort((a, b) => a.goal - b.goal);
+  if (!rows.some((r) => r.c.id === gfmCarId)) gfmCarId = rows[0]?.c.id ?? null;
+  $("#gfm-table").innerHTML = rows.length ? rows.map((r) => `<tr role="button" data-gfm-car="${r.c.id}" class="${r.c.id === gfmCarId ? "table-primary" : ""}">
+      <td>${esc(r.c.name)}</td><td class="text-end">${money(r.buy)}</td><td class="text-end">${r.extra ? money(r.extra) : "–"}</td>
+      <td class="text-end">${money(r.need)}</td><td class="text-end fw-bold">${money(r.goal)}</td>
+      <td class="text-end text-danger">${r.fees ? money2(-r.fees) : "–"}</td><td class="text-end">${r.donations || "–"}</td></tr>`).join("")
+    : `<tr><td colspan="7" class="text-body-secondary">No available cars. Mark a car as anything other than Passed or Sold to see it here.</td></tr>`;
+  $("#gfm-car").innerHTML = rows.map((r) => `<option value="${r.c.id}" ${r.c.id === gfmCarId ? "selected" : ""}>${esc(r.c.name)}</option>`).join("");
+  const r = rows.find((x) => x.c.id === gfmCarId);
+  if (!r) { $("#gfm-detail").innerHTML = ""; return; }
+  const line = (label, v, cls = "") => `<tr class="${cls}"><td>${esc(label)}</td><td class="text-end">${money(v)}</td></tr>`;
+  const perGift = inp.avg * (1 - GFM_PCT) - GFM_FIXED;
+  $("#gfm-detail").innerHTML = `<div class="row g-4">
+    <div class="col-md-6"><table class="table table-sm mb-0"><tbody>
+      ${r.items.map(([l, v]) => line(l, v)).join("")}
+      ${r.extras.map(([l, v]) => line(l, v)).join("")}
+      ${inp.have ? line("Already covered", -inp.have) : ""}
+      ${line("Amount needed", r.need, "fw-bold table-light")}
+    </tbody></table></div>
+    <div class="col-md-6">${r.need ? `
+      <div class="text-body-secondary small text-uppercase">Set the GoFundMe goal to</div>
+      <div class="display-6 fw-bold text-primary mb-2">${money(r.goal)}</div>
+      <table class="table table-sm mb-2"><tbody>
+        <tr><td>2.9% of ${money(r.goal)}</td><td class="text-end text-danger">${money2(-r.pctFee)}</td></tr>
+        <tr><td>$0.30 × about ${r.donations} donations of ${money(inp.avg)}</td><td class="text-end text-danger">${money2(-r.fixedFee)}</td></tr>
+        <tr class="fw-bold"><td>You'd receive about</td><td class="text-end">${money(Math.floor(r.net))}</td></tr>
+      </tbody></table>
+      <div class="small text-body-secondary">That covers the ${money(r.need)} needed with about ${money(Math.floor(r.net - r.need))} to spare.
+        Each ${money(inp.avg)} donation brings in ${money2(perGift)} after fees. If gifts run smaller, more of the total goes to the $0.30 fee.</div>`
+      : `<div class="alert alert-success mb-0">Already covered. No fundraiser needed for this car.</div>`}
+    </div></div>`;
+}
+function saveGoFundMe() {
+  const f = $("#gfm-form").elements;
+  const saved = { car: gfmCarId };
+  for (const el of f) if (el.name) saved[el.name] = el.type === "checkbox" ? el.checked : el.value;
+  try { localStorage.setItem("gofundme", JSON.stringify(saved)); } catch {}
+}
+$("#gfm-form").addEventListener("input", () => { drawGoFundMe(); saveGoFundMe(); });
+$("#gfm-form").addEventListener("submit", (e) => e.preventDefault());
+$("#gfm-car").addEventListener("change", (e) => { gfmCarId = +e.target.value; drawGoFundMe(); saveGoFundMe(); });
+$("#gfm-table").addEventListener("click", (e) => {
+  const id = e.target.closest("[data-gfm-car]")?.dataset.gfmCar;
+  if (id) { gfmCarId = +id; drawGoFundMe(); saveGoFundMe(); }
+});
+
 /* ---------------- Offline (PWA) ---------------- */
 function setOffline(off) {
   $("#offline-badge")?.classList.toggle("d-none", !off);
@@ -1255,7 +1368,7 @@ async function doSaveForOffline({ quiet = false } = {}) {
   btn.disabled = true;
   const urls = new Set([
     ...Object.values(CFG.pages || {}),
-    `${API}/api/cars`, `${API}/api/dash-metrics`, `${API}/api/settings/plan`, `${API}/api/options`, `${API}/api/budget`,
+    `${API}/api/cars`, `${API}/api/dash-metrics`, `${API}/api/settings/plan`, `${API}/api/options`, `${API}/api/budget`, `${API}/api/gofundme`,
   ]);
   for (const c of cars) {
     urls.add(`${API}/api/options?car_id=${c.id}`);

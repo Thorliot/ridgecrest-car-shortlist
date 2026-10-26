@@ -25,6 +25,7 @@
     if (p === "/api/cars") return file("api/cars.json");
     if (p === "/api/dash-metrics") return file("api/dash-metrics.json");
     if (p === "/api/settings/plan") return file("api/settings-plan.json");
+    if (p === "/api/gofundme") return file("api/gofundme.json");
     if (p === "/api/options") return file(`api/options/${q.get("car_id") || "default"}.json`);
     if (p === "/api/budget") {
       const r = await file(`api/budget/${q.get("car_id") || "default"}.json`);

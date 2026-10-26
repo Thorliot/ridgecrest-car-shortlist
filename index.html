@@ -89,6 +89,7 @@
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-search" data-tab="search" type="button"><i class="fa-solid fa-magnifying-glass me-1"></i>Search</button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-shortlist" data-tab="shortlist" type="button"><i class="fa-solid fa-clipboard-list me-1"></i>Shortlist <span id="shortlist-count" class="badge rounded-pill text-bg-secondary">0</span></button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-budget" data-tab="budget" type="button"><i class="fa-solid fa-wallet me-1"></i>Budget</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gofundme" data-tab="gofundme" type="button"><i class="fa-solid fa-hand-holding-heart me-1"></i>GoFundMe</button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-vin" data-tab="vin" type="button"><i class="fa-solid fa-barcode me-1"></i>VIN &amp; Recalls</button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cost" data-tab="cost" type="button"><i class="fa-solid fa-calculator me-1"></i>Cost Calculator</button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-plan" data-tab="plan" type="button"><i class="fa-solid fa-file-lines me-1"></i>Car Plan</button></li>
@@ -247,7 +248,7 @@
   <section id="tab-shortlist" class="tab-pane fade" role="tabpanel">
     <div class="d-flex flex-wrap gap-2 mb-3">
       <button id="add-car" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i>Add a car</button>
-      <select id="filter-status" class="form-select w-auto"><option value="">All statuses</option></select>
+      <select id="filter-status" class="form-select w-auto" aria-label="Filter by status"><option value="available" selected>Available only</option><option value="">All statuses</option></select>
       <select id="filter-source" class="form-select w-auto"><option value="">All sources</option></select>
       <select id="sort-by" class="form-select w-auto">
         <option value="updated">Recently updated</option><option value="price">Price (low → high)</option>
@@ -330,6 +331,61 @@
   </section>
 
   <!-- VIN -->
+  <section id="tab-gofundme" class="tab-pane fade" role="tabpanel">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5 mb-1"><i class="fa-solid fa-hand-holding-heart me-2 text-primary"></i>GoFundMe goal for each car</h2>
+        <p class="small text-body-secondary mb-0">How much to ask for so that, after GoFundMe's fees, the money covers the whole purchase.
+          GoFundMe charges personal fundraisers no platform fee, but <b>2.9% + $0.30 comes out of every donation</b>
+          (donors' optional tips to GoFundMe don't reduce what you get).</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <form id="gfm-form" class="card shadow-sm" autocomplete="off">
+          <div class="card-header fw-semibold"><i class="fa-solid fa-sliders me-2 text-primary"></i>What the fundraiser covers</div>
+          <div class="card-body vstack gap-3">
+            <div><label class="form-label small mb-1" for="gfm-basis">Car price</label>
+              <select id="gfm-basis" name="basis" class="form-select">
+                <option value="target">Target price (after negotiating)</option><option value="asking">Asking price</option></select></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="gfm-dmv" name="dmv" checked>
+              <label class="form-check-label" for="gfm-dmv">DMV transfer &amp; registration</label></div>
+            <div><label class="form-label small mb-1" for="gfm-inspect">Pre-purchase inspection</label>
+              <div class="input-group"><span class="input-group-text">$</span><input id="gfm-inspect" name="inspect" class="form-control" type="number" min="0" step="10" value="150"></div></div>
+            <div><label class="form-label small mb-1" for="gfm-ins">Months of insurance up front</label>
+              <input id="gfm-ins" name="insMonths" class="form-control" type="number" min="0" max="24" step="1" value="0"></div>
+            <div><label class="form-label small mb-1" for="gfm-cushion">Repair cushion</label>
+              <div class="input-group"><span class="input-group-text">$</span><input id="gfm-cushion" name="cushion" class="form-control" type="number" min="0" step="50" value="0"></div></div>
+            <div><label class="form-label small mb-1" for="gfm-have">Already covered (savings, Dad, other help)</label>
+              <div class="input-group"><span class="input-group-text">−$</span><input id="gfm-have" name="have" class="form-control" type="number" min="0" step="50" value="0"></div></div>
+            <div><label class="form-label small mb-1" for="gfm-avg">Typical donation</label>
+              <div class="input-group"><span class="input-group-text">$</span><input id="gfm-avg" name="avg" class="form-control" type="number" min="5" step="5" value="50"></div>
+              <div class="form-text">The $0.30 per donation costs more with many small gifts.</div></div>
+          </div>
+        </form>
+      </div>
+      <div class="col-lg-8 vstack gap-4">
+        <div class="card shadow-sm">
+          <div class="card-header fw-semibold d-flex align-items-center"><i class="fa-solid fa-table me-2 text-primary"></i>
+            <span class="me-auto">Goal by car <span class="text-body-secondary fw-normal small">(available cars, smallest goal first)</span></span></div>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead class="table-light"><tr><th>Car</th><th class="text-end">Cost to buy</th><th class="text-end">Extras</th>
+                <th class="text-end">Need</th><th class="text-end">GoFundMe goal</th><th class="text-end">Fees</th><th class="text-end">≈ Donations</th></tr></thead>
+              <tbody id="gfm-table"><tr><td colspan="7" class="text-body-secondary">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card shadow-sm">
+          <div class="card-header fw-semibold d-flex flex-wrap gap-2 align-items-center"><i class="fa-solid fa-receipt me-1 text-primary"></i>
+            <span class="me-auto">The math for one car</span>
+            <select id="gfm-car" class="form-select form-select-sm w-auto" aria-label="Car"></select></div>
+          <div class="card-body" id="gfm-detail"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="tab-vin" class="tab-pane fade" role="tabpanel">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
