@@ -30,6 +30,7 @@
     if (p === "/api/settings/plan") return file("api/settings-plan.json");
     if (p === "/api/gofundme") return file("api/gofundme.json");
     if (p === "/api/marketing") return file("api/marketing.json", "No marketing materials in this snapshot.");
+    if (p === "/api/notebook") return file("api/notebook.json", "No audio in this snapshot.");
     if (p === "/api/options") return file(`api/options/${q.get("car_id") || "default"}.json`);
     if (p === "/api/budget") {
       const r = await file(`api/budget/${q.get("car_id") || "default"}.json`);

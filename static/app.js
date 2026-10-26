@@ -390,6 +390,7 @@ async function loadCars() {
   renderBudget();
   renderGoFundMe();
   renderMarketing();
+  renderNotebook();
   if (!loadCars.autoSaved) { loadCars.autoSaved = true; setTimeout(autoSaveForOffline, 3000); }
 }
 
@@ -1377,6 +1378,55 @@ document.addEventListener("click", async (e) => {
   if (!ok) { field.focus(); field.select(); } // leave it selected so Ctrl+C / long-press Copy works
   toast(ok ? "Copied." : "Couldn't copy automatically. The text is selected, so press Ctrl+C (or long-press → Copy).", ok ? "success" : "warning");
 });
+
+/* ---------------- Notebook (NotebookLM audio) ---------------- */
+const nbUrl = (name, download = false) => abs(`/notebook/${encodeURIComponent(name)}`) + (download ? "?download=1" : "");
+const clock = (sec) => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, "0")}`;
+let nbLoaded = false;
+
+async function renderNotebook() {
+  if (nbLoaded) return; // don't interrupt something that's playing when the shortlist reloads
+  let m;
+  try { m = await api("/api/notebook"); }
+  catch (e) { $("#nb-episodes").innerHTML = `<div class="alert alert-secondary mb-0">${esc(e.message)}</div>`; return; }
+  nbLoaded = true;
+  $("#nb-title").textContent = m.title || "Notebook";
+  $("#nb-intro").textContent = m.intro || "";
+  $("#nb-episodes").innerHTML = m.episodes.map((ep, i) => `<div class="card shadow-sm"><div class="card-body">
+      <div class="d-flex flex-wrap align-items-start gap-2 mb-2">
+        <div class="me-auto">
+          <h3 class="h6 mb-1"><span class="badge text-bg-primary me-2">${i + 1}</span>${esc(ep.title)}</h3>
+          <div class="small text-body-secondary">${esc(ep.summary || "")}${ep.seconds ? ` · ${clock(ep.seconds)}` : ""} · ${fileSize(ep.bytes)}</div>
+        </div>
+        <select class="form-select form-select-sm w-auto" data-nb-speed="${i}" aria-label="Playback speed">
+          ${[1, 1.25, 1.5, 1.75, 2].map((r) => `<option value="${r}">${r}×</option>`).join("")}</select>
+        <a class="btn btn-sm btn-outline-primary" href="${nbUrl(ep.file, true)}" download="${esc(ep.file)}"><i class="fa-solid fa-download me-1"></i>Download</a>
+      </div>
+      <audio class="w-100" controls preload="metadata" data-nb="${esc(ep.file)}" src="${nbUrl(ep.file)}"></audio>
+    </div></div>`).join("");
+
+  const audios = $$("#nb-episodes audio");
+  audios.forEach((a, i) => {
+    const key = `nbPos:${a.dataset.nb}`;
+    // Pick up where you left off (on this device), and only one episode plays at a time.
+    a.addEventListener("loadedmetadata", () => {
+      let pos = 0;
+      try { pos = +localStorage.getItem(key) || 0; } catch {}
+      if (pos > 5 && pos < a.duration - 10) a.currentTime = pos;
+    }, { once: true });
+    a.addEventListener("timeupdate", () => { try { localStorage.setItem(key, a.ended ? 0 : a.currentTime); } catch {} });
+    a.addEventListener("ended", () => { try { localStorage.removeItem(key); } catch {} });
+    a.addEventListener("play", () => audios.forEach((o) => o !== a && o.pause()));
+    const speed = $(`[data-nb-speed="${i}"]`);
+    try { speed.value = localStorage.getItem("nbSpeed") || "1"; } catch {}
+    a.playbackRate = +speed.value;
+    speed.addEventListener("change", () => {
+      audios.forEach((o) => (o.playbackRate = +speed.value));
+      $$("[data-nb-speed]").forEach((s) => (s.value = speed.value));
+      try { localStorage.setItem("nbSpeed", speed.value); } catch {}
+    });
+  });
+}
 
 /* ---------------- Offline (PWA) ---------------- */
 function setOffline(off) {
