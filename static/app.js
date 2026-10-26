@@ -389,6 +389,7 @@ async function loadCars() {
   renderHome();
   renderBudget();
   renderGoFundMe();
+  renderMarketing();
   if (!loadCars.autoSaved) { loadCars.autoSaved = true; setTimeout(autoSaveForOffline, 3000); }
 }
 
@@ -1319,6 +1320,64 @@ $("#gfm-table").addEventListener("click", (e) => {
   if (id) { gfmCarId = +id; drawGoFundMe(); saveGoFundMe(); }
 });
 
+/* ---------------- Marketing ---------------- */
+// Files come from the server's /marketing/ folder (tools/gofundme_materials.py). ?download=1 makes the
+// server send them as attachments, so Download works even from the WordPress site's other origin.
+const mktUrl = (name, download = false) => abs(`/marketing/${encodeURIComponent(name)}`) + (download ? "?download=1" : "");
+const fileSize = (n) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1e3))} KB`);
+
+async function renderMarketing() {
+  let m;
+  try { m = await api("/api/marketing"); }
+  catch (e) { $("#mkt-files").innerHTML = `<div class="col-12"><div class="alert alert-secondary mb-0">${esc(e.message)}</div></div>`; return; }
+  $("#mkt-title").textContent = `${m.title} · ${money(m.goal)} goal`;
+  $("#mkt-link-group").classList.toggle("d-none", !m.link);
+  $("#mkt-link").value = m.link || "";
+  $("#mkt-open").href = m.link || "#";
+  $("#mkt-zip").href = mktUrl(m.zip, true);
+  $("#mkt-zip").setAttribute("download", m.zip);
+  $("#mkt-story").value = m.story;
+  $("#mkt-fb").value = m.share.facebook;
+  $("#mkt-ig").value = m.share.instagram;
+  $("#mkt-files").innerHTML = m.files.map((f) => {
+    const isPdf = f.file.endsWith(".pdf");
+    const thumb = mktUrl(f.preview || f.file);
+    const meta = [f.width && `${f.width}×${f.height}`, isPdf ? "PDF, letter size" : "PNG", fileSize(f.bytes)].filter(Boolean).join(" · ");
+    return `<div class="col"><div class="card h-100 shadow-sm">
+      <a href="${thumb}" target="_blank" rel="noopener" class="d-block bg-body-secondary text-center p-2" style="height:15rem">
+        <img src="${thumb}" alt="${esc(f.label)}" loading="lazy" class="h-100 mw-100 rounded shadow-sm" style="object-fit:contain"></a>
+      <div class="card-body d-flex flex-column gap-1">
+        <div class="fw-semibold">${esc(f.label)}</div>
+        <div class="small text-body-secondary">${esc(meta)}</div>
+        <div class="small">${esc(f.use)}</div>
+        <div class="d-flex gap-2 mt-auto pt-2">
+          <a class="btn btn-sm btn-primary" href="${mktUrl(f.file, true)}" download="${esc(f.file)}"><i class="fa-solid fa-download me-1"></i>Download</a>
+          ${isPdf ? `<a class="btn btn-sm btn-outline-primary" href="${mktUrl(f.file)}" target="_blank" rel="noopener"><i class="fa-solid fa-print me-1"></i>Open to print</a>` : ""}
+        </div>
+      </div></div></div>`;
+  }).join("");
+}
+
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch { // http:// on another device: no Clipboard API, fall back to a hidden textarea
+    const t = Object.assign(document.createElement("textarea"), { value: text });
+    t.style.position = "fixed"; t.style.opacity = "0";
+    document.body.append(t); t.select();
+    const ok = document.execCommand("copy");
+    t.remove();
+    return ok;
+  }
+}
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-copy]");
+  if (!btn) return;
+  const field = $(btn.dataset.copy);
+  const ok = await copyText(field.value);
+  if (!ok) { field.focus(); field.select(); } // leave it selected so Ctrl+C / long-press Copy works
+  toast(ok ? "Copied." : "Couldn't copy automatically. The text is selected, so press Ctrl+C (or long-press → Copy).", ok ? "success" : "warning");
+});
+
 /* ---------------- Offline (PWA) ---------------- */
 function setOffline(off) {
   $("#offline-badge")?.classList.toggle("d-none", !off);
@@ -1368,7 +1427,7 @@ async function doSaveForOffline({ quiet = false } = {}) {
   btn.disabled = true;
   const urls = new Set([
     ...Object.values(CFG.pages || {}),
-    `${API}/api/cars`, `${API}/api/dash-metrics`, `${API}/api/settings/plan`, `${API}/api/options`, `${API}/api/budget`, `${API}/api/gofundme`,
+    `${API}/api/cars`, `${API}/api/dash-metrics`, `${API}/api/settings/plan`, `${API}/api/options`, `${API}/api/budget`, `${API}/api/gofundme`, `${API}/api/marketing`,
   ]);
   for (const c of cars) {
     urls.add(`${API}/api/options?car_id=${c.id}`);

@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&display=swap" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="static/style.css?v=20261026104824">
+  <link rel="stylesheet" href="static/style.css?v=20261026123422">
   <style>
     /* Read-only snapshot: hide the controls that change data or install the app. */
     #pwa-bar, #add-car, #car-delete, #plan-save, #photo-files, label:has(> #photo-files), #photo-url-add,
@@ -90,6 +90,7 @@
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-shortlist" data-tab="shortlist" type="button"><i class="fa-solid fa-clipboard-list me-1"></i>Shortlist <span id="shortlist-count" class="badge rounded-pill text-bg-secondary">0</span></button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-budget" data-tab="budget" type="button"><i class="fa-solid fa-wallet me-1"></i>Budget</button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gofundme" data-tab="gofundme" type="button"><i class="fa-solid fa-hand-holding-heart me-1"></i>GoFundMe</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-marketing" data-tab="marketing" type="button"><i class="fa-solid fa-bullhorn me-1"></i>Marketing</button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-vin" data-tab="vin" type="button"><i class="fa-solid fa-barcode me-1"></i>VIN &amp; Recalls</button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cost" data-tab="cost" type="button"><i class="fa-solid fa-calculator me-1"></i>Cost Calculator</button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-plan" data-tab="plan" type="button"><i class="fa-solid fa-file-lines me-1"></i>Car Plan</button></li>
@@ -386,6 +387,49 @@
     </div>
   </section>
 
+  <section id="tab-marketing" class="tab-pane fade" role="tabpanel">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body d-flex flex-wrap gap-3 align-items-center">
+        <div class="me-auto">
+          <h2 class="h5 mb-1"><i class="fa-solid fa-bullhorn me-2 text-primary"></i><span id="mkt-title">GoFundMe marketing</span></h2>
+          <div class="small text-body-secondary">Images, flyer and text for the fundraiser. Download what you need, or grab everything at once.</div>
+        </div>
+        <div class="input-group w-auto" id="mkt-link-group">
+          <span class="input-group-text"><i class="fa-solid fa-link"></i></span>
+          <input id="mkt-link" class="form-control" readonly aria-label="Campaign link" style="min-width:14rem">
+          <button class="btn btn-outline-primary" type="button" data-copy="#mkt-link"><i class="fa-solid fa-copy me-1"></i>Copy</button>
+          <a class="btn btn-outline-primary" id="mkt-open" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Open</a>
+        </div>
+        <a class="btn btn-primary" id="mkt-zip" download><i class="fa-solid fa-file-zipper me-1"></i>Download all (.zip)</a>
+      </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4" id="mkt-files"></div>
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+          <div class="card-header fw-semibold d-flex align-items-center"><i class="fa-solid fa-feather me-2 text-primary"></i>
+            <span class="me-auto">Campaign story</span>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-copy="#mkt-story"><i class="fa-solid fa-copy me-1"></i>Copy</button></div>
+          <div class="card-body"><textarea id="mkt-story" class="form-control" rows="14" readonly aria-label="Campaign story"></textarea></div>
+        </div>
+      </div>
+      <div class="col-lg-5 vstack gap-4">
+        <div class="card shadow-sm">
+          <div class="card-header fw-semibold d-flex align-items-center"><i class="fa-brands fa-facebook me-2 text-primary"></i>
+            <span class="me-auto">Facebook / text message</span>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-copy="#mkt-fb"><i class="fa-solid fa-copy me-1"></i>Copy</button></div>
+          <div class="card-body"><textarea id="mkt-fb" class="form-control" rows="4" readonly aria-label="Facebook post"></textarea></div>
+        </div>
+        <div class="card shadow-sm">
+          <div class="card-header fw-semibold d-flex align-items-center"><i class="fa-brands fa-instagram me-2 text-primary"></i>
+            <span class="me-auto">Instagram caption</span>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-copy="#mkt-ig"><i class="fa-solid fa-copy me-1"></i>Copy</button></div>
+          <div class="card-body"><textarea id="mkt-ig" class="form-control" rows="3" readonly aria-label="Instagram caption"></textarea></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="tab-vin" class="tab-pane fade" role="tabpanel">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
@@ -668,7 +712,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="static/snapshot-shim.js?v=20261026104824"></script>
-<script src="static/app.js?v=20261026104824"></script>
+<script src="static/snapshot-shim.js?v=20261026123422"></script>
+<script src="static/app.js?v=20261026123422"></script>
 </body>
 </html>
