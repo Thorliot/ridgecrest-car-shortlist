@@ -5,7 +5,7 @@
    - Notebook audio: the first play also downloads the whole episode in the background, then seeking works
      offline from the saved copy.
    - A new snapshot ships a new VERSION: the old copy is deleted once the new one is installed. */
-const VERSION = "20261029132411";
+const VERSION = "20261029161149";
 const SHELL = ["./", "manifest.webmanifest", "static/app.js", "static/style.css", "static/snapshot-shim.js", "static/icons/apple-touch-icon.png", "static/icons/icon-192.png", "static/icons/icon-512.png", "static/icons/icon-maskable-512.png", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&display=swap", "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css", "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css", "https://www.nhtsa.gov/recalls", "https://vehiclehistory.bja.ojp.gov/nmvtis_vehiclehistory", "https://www.nicb.org/vincheck", "https://www.carfax.com", "https://www.autocheck.com", "https://www.bar.ca.gov/consumer/smog-check-program", "https://maps.cdtfa.ca.gov/", "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"];
 const CACHE = `rcf-snapshot-${VERSION}`;
 const MEDIA = "rcf-snapshot-media"; // audio is large and rarely changes, so it survives new snapshots
