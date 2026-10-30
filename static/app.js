@@ -970,15 +970,15 @@ const PLAN_FIELDS = [
   ["dasher_status", "Dasher status", "text"], ["recent_deliveries", "Deliveries last week", "number"],
   ["recent_earned", "Earned last week ($)", "number"], ["online_hours", "Hours online", "number"],
   ["delivering_hours", "Hours delivering", "number"], ["violation_remaining", "Deliveries until violation clears", "number"],
-  ["violation_days", "Days to clear at current pace", "number"], ["prepay", "Up-front payment ($)", "number"],
+  ["violation_days", "Days to clear at current pace", "number"], ["prepay", "Insurance I prepay up front ($)", "number"],
   ["step1", "First payment step ($/mo)", "number"], ["step2", "Full payment step ($/mo)", "number"],
   ["example_zero_months", "Example: months at $0", "number"], ["example_step1_months", "Example: months at first step", "number"],
-  ["base_insurance", "Insurance for a typical car ($/mo)", "number"], ["gas_price", "Gas price ($/gal)", "number"],
+  ["gas_price", "Gas price ($/gal)", "number"],
   ["miles_per_delivery", "Miles per delivery", "number"], ["weekly_base_miles", "Extra miles per week", "number"],
   ["child_support_pct", "Child support (% of earnings)", "number"], ["phone_weekly", "Phone ($/week)", "number"],
   ["food_utilities_monthly", "Food & utilities ($/month)", "number"], ["tax_rate_pct", "Tax set-aside rate (%)", "number"],
   ["mileage_rate", "Mileage deduction ($/mile)", "number"], ["cushion", "Cushion kept at each step (0–1)", "number"],
-  ["options_insurance", "Own liability insurance, typical car ($/mo)", "number"],
+  ["options_insurance", "My own insurance, typical car ($/mo)", "number"],
   ["delivery_tiers", "DoorDash tiers on each car (deliveries/wk, comma-separated)", "text"],
   ["legal_aid", "Legal aid organization", "text"], ["late_days", "Late after (days)", "number"],
   ["default_days", "Default after (days late)", "number"], ["cure_days", "Days to fix a default", "number"],
@@ -1113,7 +1113,7 @@ async function renderBudget() {
   $("#budget-stats").innerHTML =
     stat(`I repay ${esc(d.owner)}`, money(d.totals.target), `at the ${money(d.target)} target, no interest`) +
     stat("Paid off around", `month ${d.payoff_month.target}`, `~${(d.payoff_month.target / 12).toFixed(1)} years (${d.payoff_month.asking} at asking)`) +
-    stat("Insurance", `${money(d.insurance)}/mo`, `my ${money(d.prepay)} up front covers ~${d.prepay_months} months`) +
+    stat("My insurance", `${money(d.insurance)}/mo`, `my own policy · ${money(d.prepay)} prepaid covers ~${d.prepay_months} months`) +
     stat("Each week right now", `<span class="${now.left < 0 ? "text-danger" : "text-success"}">${signed(now.left)}</span>`, `at ${d.recent} deliveries, insurance prepaid`);
 
   const same = d.target >= d.price;
@@ -1129,8 +1129,8 @@ async function renderBudget() {
   const st = d.steps, th = d.thresholds;
   const step = (badge, color, title, body) => `<div class="d-flex gap-3 mb-3"><span class="badge text-bg-${color} fs-6 align-self-start" style="min-width:4.5rem">${badge}</span><div><div class="fw-semibold">${title}</div><div class="small text-body-secondary">${body}</div></div></div>`;
   $("#budget-steps").innerHTML =
-    step("$0", "secondary", "While my deliveries recover", `I pay the insurance (${money(d.insurance)}/mo) from my ${money(d.prepay)} up-front payment. I can cover insurance myself at about <b>${th.insurance}</b> deliveries a week.`) +
-    step(`${money(st.step1)}/mo`, "warning", `After four straight weeks of ${th.step1}+ deliveries`, `Car payment starts, plus insurance.`) +
+    step("$0", "secondary", "While my deliveries recover", `My own insurance (${money(d.insurance)}/mo) is prepaid for the first months with ${money(d.prepay)}. After that I can cover it from deliveries at about <b>${th.insurance}</b> a week.`) +
+    step(`${money(st.step1)}/mo`, "warning", `After four straight weeks of ${th.step1}+ deliveries`, `Car payment starts.`) +
     step(`${money(st.step2)}/mo`, "success", `After four straight weeks of ${th.step2}+ deliveries`, `Full payment until it's paid off. I can pay extra in good weeks.`) +
     `<div class="form-text">Example used for payoff: $0 for ${st.zero_months} months, ${money(st.step1)} for ${st.step1_months}, then ${money(st.step2)}.</div>`;
 
@@ -1191,8 +1191,8 @@ function renderBudgetTable() {
     ${cols.some((c) => c.repair_fund) ? row("Repair fund", (c) => neg(c.repair_fund)) : ""}
     ${row("Phone and registration", (c) => neg(c.phone_registration))}
     ${row("Tax set-aside", (c) => neg(c.tax))}
-    ${row(`Available before paying ${esc(d.owner)}`, (c) => `<b>${v(c.available)}</b>`, "table-active")}
-    ${row(`Insurance to ${esc(d.owner)} (~${money(d.insurance)}/mo)`, (c) => (c.insurance_prepaid ? '<span class="badge text-bg-secondary">prepaid</span>' : neg(c.insurance)))}
+    ${row("Available before insurance and payments", (c) => `<b>${v(c.available)}</b>`, "table-active")}
+    ${row(`My insurance (~${money(d.insurance)}/mo)`, (c) => (c.insurance_prepaid ? '<span class="badge text-bg-secondary">prepaid</span>' : neg(c.insurance)))}
     ${row(`Car payment to ${esc(d.owner)}`, (c) => neg(c.car_payment))}
     ${row(`Food and utilities (${money(d.food_utilities_monthly)}/mo)`, (c) => neg(c.food_utilities))}
     ${row(`Left over each ${per}`, (c) => `<b class="${c.left < 0 ? "text-danger" : "text-success"}">${v(c.left)}</b>`, "table-active")}
@@ -1244,7 +1244,7 @@ let gfmCarId = null;
 function gfmInputs() {
   const f = $("#gfm-form").elements;
   const n = (name, d = 0) => { const v = parseFloat(f[name].value); return isFinite(v) && v >= 0 ? v : d; };
-  return { basis: f.basis.value, dmv: f.dmv.checked, inspect: n("inspect"), insMonths: Math.round(n("insMonths")),
+  return { basis: f.basis.value, dmv: f.dmv.checked, inspect: n("inspect"),
     cushion: n("cushion"), have: n("have"), avg: Math.max(5, n("avg", 50)) };
 }
 // Fees on `goal` raised in gifts of about `avg`: 2.9% of everything plus $0.30 per donation.
@@ -1266,7 +1266,6 @@ function gfmRow(c, inp, taxRate) {
   if (inp.dmv) items.push(["DMV transfer & registration", c.dmv_once]);
   const extras = [];
   if (inp.inspect) extras.push(["Pre-purchase inspection", inp.inspect]);
-  if (inp.insMonths) extras.push([`Insurance, ${inp.insMonths} month${inp.insMonths === 1 ? "" : "s"} × ${money(c.insurance_monthly)}`, inp.insMonths * c.insurance_monthly]);
   if (inp.cushion) extras.push(["Repair cushion", inp.cushion]);
   const sum = (xs) => xs.reduce((t, [, v]) => t + v, 0);
   const buy = sum(items);

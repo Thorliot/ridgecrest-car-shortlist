@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&display=swap" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="static/style.css?v=20261030071301">
+  <link rel="stylesheet" href="static/style.css?v=20261030092542">
   <style>
     /* Read-only snapshot: hide the controls that change data (the offline/install bar stays). */
     #edit-lock, #add-car, #car-delete, #plan-save, #photo-files, label:has(> #photo-files), #photo-url-add,
@@ -187,9 +187,7 @@
           <div class="card-header fw-semibold"><i class="fa-solid fa-thumbs-up me-2 text-primary"></i>Other ways to help besides the car itself</div>
           <ul class="list-group list-group-flush">
             <li class="list-group-item">Paying for a mechanic's inspection before we buy (about $100 to $150).</li>
-            <li class="list-group-item">Covering insurance for the first few months while my deliveries recover.</li>
             <li class="list-group-item">Starting a repair fund so one breakdown doesn't take me off the road.</li>
-            <li class="list-group-item">Putting the car on your insurance, if your insurer allows it, with me paying you back.</li>
           </ul>
         </div>
       </div>
@@ -198,7 +196,7 @@
           <div class="card-header fw-semibold"><i class="fa-solid fa-square-check me-2 text-primary"></i>My commitments to you</div>
           <ul class="list-group list-group-flush">
             <li class="list-group-item">Get a mechanic's inspection before buying anything.</li>
-            <li class="list-group-item">Keep the car insured, maintained and registered.</li>
+            <li class="list-group-item">Insure the car under my own policy, and keep it maintained and registered.</li>
             <li class="list-group-item">Avoid another late-pickup violation: when the app offers to let me wait it out or pass the rest of a delivery without hurting my completion rate, I'll use it.</li>
             <li class="list-group-item">Track my deliveries and miles and share them with you.</li>
             <li class="list-group-item">Save a repair fund every week.</li>
@@ -371,8 +369,6 @@
               <label class="form-check-label" for="gfm-dmv">DMV transfer &amp; registration</label></div>
             <div><label class="form-label small mb-1" for="gfm-inspect">Pre-purchase inspection</label>
               <div class="input-group"><span class="input-group-text">$</span><input id="gfm-inspect" name="inspect" class="form-control" type="number" min="0" step="10" value="150"></div></div>
-            <div><label class="form-label small mb-1" for="gfm-ins">Months of insurance up front</label>
-              <input id="gfm-ins" name="insMonths" class="form-control" type="number" min="0" max="24" step="1" value="0"></div>
             <div><label class="form-label small mb-1" for="gfm-cushion">Repair cushion</label>
               <div class="input-group"><span class="input-group-text">$</span><input id="gfm-cushion" name="cushion" class="form-control" type="number" min="0" step="50" value="0"></div></div>
             <div><label class="form-label small mb-1" for="gfm-have">Already covered (savings, Dad, other help)</label>
@@ -597,7 +593,7 @@
             <div id="sec-plan" class="accordion-collapse collapse" data-bs-parent="#car-sections"><div class="accordion-body">
               <div class="row g-3">
                 <div class="col-6 col-md-3"><label class="form-label">Target price ($)</label><input class="form-control" id="plan-target" type="number" step="100" placeholder="90% of price"></div>
-                <div class="col-6 col-md-3"><label class="form-label">Insurance in plan ($/mo)</label><input class="form-control" id="plan-ins" type="number" step="5" placeholder="estimated"></div>
+                <div class="col-6 col-md-3"><label class="form-label">My insurance in plan ($/mo)</label><input class="form-control" id="plan-ins" type="number" step="5" placeholder="estimated"></div>
                 <div class="col-6 col-md-3"><label class="form-label">City MPG</label><input class="form-control" id="plan-mpg" type="number" step="1" placeholder="from MPG"></div>
                 <div class="col-6 col-md-3"><label class="form-label">Weekly repair fund ($)</label><input class="form-control" id="plan-fund" type="number" step="5" placeholder="0"></div>
                 <div class="col-md-6"><label class="form-label">Extra costs I'll pay</label><input class="form-control" id="plan-extras" placeholder="e.g. the windshield repair (about $500)"></div>
@@ -740,7 +736,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="static/snapshot-shim.js?v=20261030071301"></script>
-<script src="static/app.js?v=20261030071301"></script>
+<script src="static/snapshot-shim.js?v=20261030092542"></script>
+<script src="static/app.js?v=20261030092542"></script>
 </body>
 </html>
