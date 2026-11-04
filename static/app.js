@@ -264,7 +264,7 @@ $('#car-form [name="status"]').innerHTML = STATUSES.map(([v, l]) => `<option val
 $("#filter-status").innerHTML += STATUSES.map(([v, l]) => `<option value="${v}">${l}</option>`).join("");
 // "Available only" (the default) hides cars you bought or passed on, and ones that sold to someone else.
 const GONE = ["passed", "sold", "bought"];
-try { const f = localStorage.getItem("statusFilter"); if (f !== null && $(`#filter-status option[value="${f}"]`)) $("#filter-status").value = f; } catch {}
+try { const f = PUBLIC ? null : localStorage.getItem("statusFilter"); if (f !== null && $(`#filter-status option[value="${f}"]`)) $("#filter-status").value = f; } catch {}
 
 let cars = [];
 const selected = new Set();
