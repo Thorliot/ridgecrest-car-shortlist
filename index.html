@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ridgecrest Car Finder</title>
+  <meta name="theme-color" content="#2b2350">
+  <meta name="description" content="Find, vet and budget a reliable used car around Ridgecrest, CA.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="static/icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="static/icons/apple-touch-icon.png">
+  <script>
+    // Follow the OS light/dark setting (Bootstrap 5.3 color modes).
+    document.documentElement.dataset.bsTheme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&display=swap" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="static/style.css?v=20261103190452">
+  <style>
+    /* Read-only site: hide the controls that change data and private tracking (the offline/install bar stays). */
+    #edit-lock, #add-car, #filter-status, #car-delete, #photo-files, label:has(> #photo-files), #photo-url-add,
+    #sort-by option[value=rating], #car-form button[type=submit] { display: none !important; }
+  </style>
+</head>
+<body class="bg-body-tertiary app-body">
+
+<header class="app-header text-white mb-4">
+  <!-- Dusk on the open road: sky, sun, distant mesas, canyon walls, Joshua trees and the highway -->
+  <svg class="app-header-scene" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="scene-sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" class="scene-sky-top"/><stop offset=".42" class="scene-sky-mid"/>
+        <stop offset=".7" class="scene-sky-low"/><stop offset=".86" class="scene-sky-horizon"/>
+      </linearGradient>
+      <linearGradient id="scene-sun-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffe7a3"/><stop offset="1" stop-color="#f08a3c"/>
+      </linearGradient>
+      <mask id="scene-sun-bands">
+        <rect width="1440" height="320" fill="#fff"/>
+        <g fill="#000"><rect x="760" y="196" width="280" height="4"/><rect x="760" y="206" width="280" height="6"/><rect x="760" y="218" width="280" height="8"/></g>
+      </mask>
+    </defs>
+    <rect width="1440" height="320" fill="url(#scene-sky)"/>
+    <g class="scene-stars" fill="#fff">
+      <circle cx="120" cy="40" r="1.4"/><circle cx="260" cy="90" r="1"/><circle cx="410" cy="30" r="1.6"/><circle cx="560" cy="70" r="1"/>
+      <circle cx="690" cy="22" r="1.3"/><circle cx="830" cy="58" r="1"/><circle cx="980" cy="34" r="1.5"/><circle cx="1110" cy="84" r="1"/>
+      <circle cx="1240" cy="26" r="1.3"/><circle cx="1360" cy="66" r="1.1"/><circle cx="340" cy="140" r=".9"/><circle cx="1180" cy="150" r=".9"/>
+    </g>
+    <circle class="scene-moon" cx="880" cy="150" r="20" fill="#f5ecd7"/>
+    <circle class="scene-sun" cx="900" cy="214" r="74" mask="url(#scene-sun-bands)"/>
+    <path class="scene-far" d="M0 232 L70 228 L92 204 L188 204 L206 226 L330 230 L352 214 L410 214 L428 228 L560 234 L640 222 L700 236
+      L780 236 L860 226 L880 208 L990 208 L1006 224 L1120 230 L1150 212 L1236 212 L1258 230 L1360 226 L1440 232 V320 H0 Z"/>
+    <path class="scene-mid" d="M0 256 L40 250 L58 226 L150 226 L170 244 L260 250 L300 246 L330 256 L600 252 L700 240 L740 240
+      L840 252 L1100 256 L1130 246 L1210 244 L1226 222 L1330 222 L1348 246 L1440 250 V320 H0 Z"/>
+    <path class="scene-near" d="M0 276 L120 268 L180 272 L300 262 L420 270 L560 260 L700 252 L740 252 L880 262 L1040 270
+      L1160 264 L1300 272 L1440 266 V320 H0 Z"/>
+    <path class="scene-ground" d="M0 296 L360 284 L700 262 L740 262 L1080 284 L1440 296 V320 H0 Z"/>
+    <path class="scene-road" d="M708 252 L732 252 L1010 320 L430 320 Z"/>
+    <g class="scene-line">
+      <path d="M719 256 L721 256 L722.4 262 L717.6 262 Z"/><path d="M716.8 268 L723.2 268 L725 278 L715 278 Z"/>
+      <path d="M713.6 288 L726.4 288 L729 302 L711 302 Z"/><path d="M709.4 312 L730.6 312 L732 320 L708 320 Z"/>
+    </g>
+    <!-- Joshua trees, the Mojave's signature -->
+    <g class="scene-tree">
+      <path d="M232 284 V244 l-10 -12 v-8 h4 v6 l8 10 v-18 l-8 -10 v-7 h4 v5 l6 8 v-12 h5 v26 l9 -11 v-9 h4 v11 l-13 16 V284 Z"/>
+      <path d="M1236 286 V252 l-8 -9 v-6 h3 v4 l6 7 v-14 l-7 -8 v-6 h3 v4 l5 6 v-10 h4 v22 l7 -9 v-8 h3 v9 l-10 13 V286 Z"/>
+      <path d="M118 290 V266 l-6 -7 v-5 h3 v3 l4 5 v-10 h3 v14 l5 -6 v-5 h3 v6 l-8 9 V290 Z"/>
+      <path d="M1352 292 V270 l-6 -6 v-5 h3 v3 l4 4 v-9 h3 v12 l5 -6 v-4 h3 v5 l-8 9 V292 Z"/>
+    </g>
+  </svg>
+  <div class="container-xl pt-3">
+    <div class="d-flex align-items-center gap-3">
+      <!-- US Route 395, the highway through Ridgecrest -->
+      <svg class="route-shield" viewBox="0 0 48 48" role="img" aria-label="US Route 395 shield">
+        <path d="M24 3.5c5.6 3 11.6 3 17 .4 3.4 6.2 3.6 13.6.2 19.2 4 7.4 1.4 18.2-17.2 21.4C5.4 41.3 2.8 30.5 6.8 23.1 3.4 17.5 3.6 10.1 7 3.9c5.4 2.6 11.4 2.6 17-.4Z"
+              fill="#fffaf3" stroke="#1b1410" stroke-width="2.5" stroke-linejoin="round"/>
+        <text x="24" y="16.5" text-anchor="middle" font-family="Overpass, Arial, sans-serif" font-weight="800" font-size="7.5" fill="#1b1410">US</text>
+        <text x="24" y="32.5" text-anchor="middle" font-family="Overpass, Arial, sans-serif" font-weight="800" font-size="15" letter-spacing="-.5" fill="#1b1410">395</text>
+      </svg>
+      <div>
+        <h1 class="h3 mb-0 brand-title">Ridgecrest Car Finder</h1>
+        <p class="mb-0 brand-sub">Find, vet, and buy a car for the road · Ridgecrest, CA 93555</p>
+      </div>
+    </div>
+    <!-- Menus instead of a long row of tabs: each menu holds related pages (Bootstrap tabs inside dropdowns). -->
+    <ul class="nav nav-tabs border-0 mt-3" id="tabs" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-home" data-tab="home" type="button"><i class="fa-solid fa-house me-1"></i>Home</button></li>
+      <li class="nav-item dropdown" data-group="cars">
+        <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa-solid fa-car-side me-1"></i>Cars</button>
+        <ul class="dropdown-menu">
+          <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-search" data-tab="search" type="button"><i class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Search</button></li>
+          <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-shortlist" data-tab="shortlist" type="button"><i class="fa-solid fa-clipboard-list fa-fw me-2"></i>Shortlist <span id="shortlist-count" class="badge rounded-pill text-bg-secondary">0</span></button></li>
+          <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-vin" data-tab="vin" type="button"><i class="fa-solid fa-barcode fa-fw me-2"></i>VIN &amp; Recalls</button></li>
+          <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-guide" data-tab="guide" type="button"><i class="fa-solid fa-book-open fa-fw me-2"></i>Buying Guide</button></li>
+        </ul>
+      </li>
+      <li class="nav-item dropdown" data-group="money">
+        <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa-solid fa-wallet me-1"></i>Money</button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-budget" data-tab="budget" type="button"><i class="fa-solid fa-wallet fa-fw me-2"></i>Budget</button></li>
+          <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-cost" data-tab="cost" type="button"><i class="fa-solid fa-calculator fa-fw me-2"></i>Cost Calculator</button></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<main class="container-xl pb-5 tab-content">
+  <div class="alert alert-info d-flex gap-2 align-items-start"><i class="fa-solid fa-calendar-check mt-1"></i><div><b>Listings last checked November 3, 2026.</b> Listings change daily, so confirm with the seller before driving out.</div></div>
+
+  <!-- HOME -->
+  <section id="tab-home" class="tab-pane fade show active" role="tabpanel">
+    <div class="p-4 mb-4 bg-body rounded-3 shadow-sm">
+      <h2 class="display-6 fw-semibold mb-1">Find a reliable used car around Ridgecrest</h2>
+      <p class="text-body-secondary mb-3">Ridgecrest, CA | Out to Lancaster/Palmdale and Bakersfield</p>
+      <p class="lead mb-0">Real listings, checked for reliability, with what each car costs to buy and to run. Ridgecrest is small, so a good car often means a drive. This site helps you decide which ones are worth it.</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
+      <div class="col"><div class="card h-100 shadow-sm"><div class="card-body">
+        <h3 class="h5"><i class="fa-solid fa-clipboard-list me-2 text-primary"></i>Compare the shortlist</h3>
+        <p>See photos, gas mileage, known problems and recalls for each car, and compare them side by side.</p>
+        <button class="btn btn-sm btn-primary" data-goto="shortlist">See the shortlist <i class="fa-solid fa-arrow-right"></i></button>
+      </div></div></div>
+      <div class="col"><div class="card h-100 shadow-sm"><div class="card-body">
+        <h3 class="h5"><i class="fa-solid fa-magnifying-glass me-2 text-primary"></i>Search for more</h3>
+        <p>Build searches across the big listing sites and local dealers, already filtered to this area.</p>
+        <button class="btn btn-sm btn-outline-primary" data-goto="search">Start a search <i class="fa-solid fa-arrow-right"></i></button>
+      </div></div></div>
+      <div class="col"><div class="card h-100 shadow-sm"><div class="card-body">
+        <h3 class="h5"><i class="fa-solid fa-calculator me-2 text-primary"></i>Work out the cost</h3>
+        <p>Get the out-the-door price with local tax and DMV fees, loan payments, and a sample delivery-driving budget.</p>
+        <button class="btn btn-sm btn-outline-primary" data-goto="cost">Open the calculator <i class="fa-solid fa-arrow-right"></i></button>
+      </div></div></div>
+    </div>
+
+    <div class="d-flex align-items-center mb-3">
+      <h3 class="h5 mb-0 me-auto"><i class="fa-solid fa-car-side me-2 text-primary"></i>Top picks right now</h3>
+      <button class="btn btn-sm btn-outline-primary" data-goto="shortlist">Full shortlist <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4" id="home-cars"></div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header"><h3 class="h5 mb-0"><i class="fa-solid fa-tags me-2 text-primary"></i>What "reliable" costs</h3></div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light"><tr><th>Budget</th><th>What it typically buys</th><th>Life as a daily or delivery car</th></tr></thead>
+          <tbody>
+            <tr><td class="fw-semibold">$2,000 to $4,000</td><td>2000s Civic or Corolla, 180,000+ miles</td><td><span class="badge text-bg-danger">1 to 2 years</span> real repair risk</td></tr>
+            <tr><td class="fw-semibold">$8,000 to $11,000</td><td>2015 to 2018 Fit, Corolla or Prius, around 100,000 miles</td><td><span class="badge text-bg-warning">3 to 5 years</span></td></tr>
+            <tr><td class="fw-semibold">$13,000 to $16,000</td><td>2018 to 2021 Corolla, Civic or Prius, 50,000 to 80,000 miles</td><td><span class="badge text-bg-success">5+ years</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card-body"><p class="mb-0">The best long-term value for heavy driving is usually a <b>Prius or Corolla in the $9,000 to $13,000 range</b>: reliable, cheap on gas and easy to resell.</p></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header fw-semibold"><i class="fa-solid fa-square-check me-2 text-primary"></i>Before you buy</div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Get a pre-purchase inspection at a shop you choose (about $100 to $200).</li>
+            <li class="list-group-item">Check the VIN for open recalls and run a history report.</li>
+            <li class="list-group-item">Get an insurance quote first, especially for a salvage title.</li>
+            <li class="list-group-item">See the car and the title in person before paying anything.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header fw-semibold"><i class="fa-solid fa-bag-shopping me-2 text-primary"></i>Buying a car to deliver with?</div>
+          <div class="card-body">
+            <p>Gas and repairs decide whether a delivery car pays off. The <b>Budget</b> tab shows a sample week for each car using typical numbers.</p>
+            <p>To use your own numbers, try the free <a href="https://thorliot.github.io/delivery-car-finder/" target="_blank" rel="noopener">Delivery Car Finder</a>. Everything on it updates as you type.</p>
+            <button class="btn btn-sm btn-outline-primary" data-goto="budget">Open the Budget tab <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-text">Listings sell fast, so confirm with the seller before you drive out. All costs are estimates, not financial advice. Not affiliated with DoorDash or any listing site.</div>
+  </section>
+
+  <!-- SEARCH -->
+  <section id="tab-search" class="tab-pane fade" role="tabpanel">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5 card-title">What are you looking for?</h2>
+        <form id="search-form" class="row g-3 align-items-end">
+          <div class="col-6 col-md-3"><label class="form-label">Make</label><input class="form-control" name="make" placeholder="any make" list="makes"></div>
+          <div class="col-6 col-md-3"><label class="form-label">Model</label><input class="form-control" name="model" placeholder="any model"></div>
+          <div class="col-6 col-md-2"><label class="form-label">Min year</label><input class="form-control" name="minYear" type="number" min="1980" max="2027" placeholder="any"></div>
+          <div class="col-6 col-md-2"><label class="form-label">Max price ($)</label><input class="form-control" name="maxPrice" type="number" step="500" placeholder="no limit"></div>
+          <div class="col-6 col-md-2"><label class="form-label">Max miles</label><input class="form-control" name="maxMiles" type="number" step="5000" placeholder="no limit"></div>
+          <div class="col-6 col-md-2"><label class="form-label">Radius (mi)</label>
+            <select class="form-select" name="radius"><option>25</option><option>50</option><option selected>100</option><option>150</option><option>200</option><option>300</option></select></div>
+          <div class="col-6 col-md-2"><label class="form-label">Condition</label>
+            <select class="form-select" name="condition"><option value="used" selected>Used</option><option value="new">New</option><option value="all">Any</option></select></div>
+          <div class="col-12 col-md-8 d-flex gap-2">
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass me-1"></i>Build searches</button>
+            <button type="button" id="search-clear" class="btn btn-outline-secondary">Clear</button>
+          </div>
+        </form>
+        <datalist id="makes">
+          <option>Toyota</option><option>Ford</option><option>Chevrolet</option><option>Honda</option><option>Nissan</option><option>Jeep</option>
+          <option>Ram</option><option>GMC</option><option>Subaru</option><option>Hyundai</option><option>Kia</option><option>Mazda</option>
+          <option>Tesla</option><option>Dodge</option><option>Lexus</option><option>Volkswagen</option>
+        </datalist>
+        <div class="form-text mt-3">Ridgecrest is small, so most inventory is in Bakersfield, Lancaster/Palmdale, and Victorville (all 1.5–2 hrs away). A 100–150 mi radius is a good start.</div>
+      </div>
+    </div>
+
+    <div id="search-summary" class="alert alert-primary"></div>
+    <div id="search-results" class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4"></div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 card-title">Dealers in &amp; near Ridgecrest</h2>
+        <p class="text-body-secondary small">Verify hours and inventory before driving — listings change.</p>
+        <div id="dealers" class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-2"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHORTLIST -->
+  <section id="tab-shortlist" class="tab-pane fade" role="tabpanel">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <button id="add-car" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i>Add a car</button>
+      <select id="filter-status" class="form-select w-auto mw-100" aria-label="Filter by status"><option value="available" selected>Available only</option><option value="">All statuses</option></select>
+      <select id="filter-source" class="form-select w-auto mw-100"><option value="">All sources</option></select>
+      <select id="sort-by" class="form-select w-auto mw-100">
+        <option value="updated">Recently updated</option><option value="price">Price (low → high)</option>
+        <option value="mileage">Mileage (low → high)</option><option value="year">Year (new → old)</option><option value="rating">Rating</option><option value="dash">Delivery profit (best first)</option><option value="mpg">Gas mileage (best first)</option>
+      </select>
+      <button id="compare-btn" class="btn btn-outline-secondary"><i class="fa-solid fa-table-columns me-1"></i>Compare selected</button>
+    </div>
+    <div id="car-list" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3"></div>
+    <div id="compare" class="card shadow-sm mt-4 d-none"></div>
+  </section>
+
+  <!-- BUDGET: a sample delivery-driving budget for one car, at typical numbers -->
+  <section id="tab-budget" class="tab-pane fade" role="tabpanel">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body d-flex flex-wrap align-items-end gap-3">
+        <div class="me-auto">
+          <h2 class="h5 mb-1"><i class="fa-solid fa-wallet me-2 text-primary"></i>Delivery budget</h2>
+          <div class="small text-body-secondary">A sample budget for delivery driving, using typical numbers. For your own, use the <a href="https://thorliot.github.io/delivery-car-finder/" target="_blank" rel="noopener">Delivery Car Finder</a>.</div>
+        </div>
+        <div><label class="form-label small mb-1" for="budget-car">Car</label><select id="budget-car" class="form-select"></select></div>
+        <div style="width:11rem"><label class="form-label small mb-1" for="budget-extra">What if you make…</label>
+          <div class="input-group"><input id="budget-extra" class="form-control" type="number" inputmode="numeric" min="1" max="200" placeholder="e.g. 38"><span class="input-group-text">/wk</span></div></div>
+        <a id="budget-report-pdf" class="btn btn-primary" target="_blank" rel="noopener"><i class="fa-solid fa-file-lines me-1"></i>Details PDF</a>
+      </div>
+    </div>
+
+    <div id="budget-whatif" class="d-none mb-4" aria-live="polite"></div>
+    <div class="row row-cols-2 row-cols-lg-4 g-3 mb-4" id="budget-stats"></div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+          <div class="card-header fw-semibold"><i class="fa-solid fa-receipt me-2 text-primary"></i>What it costs to buy</div>
+          <div class="table-responsive"><table class="table mb-0 align-middle" id="budget-cost"></table></div>
+          <div class="card-body small text-body-secondary" id="budget-cost-note"></div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+          <div class="card-header fw-semibold"><i class="fa-solid fa-piggy-bank me-2 text-primary"></i>How many deliveries it takes</div>
+          <div class="card-body" id="budget-steps"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex flex-wrap align-items-center gap-2">
+        <span class="fw-semibold me-auto"><i class="fa-solid fa-table me-2 text-primary"></i>Budget by number of deliveries</span>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Period">
+          <input type="radio" class="btn-check" name="budget-period" id="budget-weekly" value="week" checked>
+          <label class="btn btn-outline-secondary" for="budget-weekly">Weekly</label>
+          <input type="radio" class="btn-check" name="budget-period" id="budget-monthly" value="month">
+          <label class="btn btn-outline-secondary" for="budget-monthly">Monthly</label>
+        </div>
+      </div>
+      <div class="table-responsive"><table class="table table-sm table-hover align-middle mb-0" id="budget-table"></table></div>
+      <div class="card-body small text-body-secondary" id="budget-table-note"></div>
+    </div>
+  </section>
+
+  <!-- VIN -->
+  <section id="tab-vin" class="tab-pane fade" role="tabpanel">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5 card-title">Decode a VIN &amp; check recalls</h2>
+        <p class="text-body-secondary small">Free data from NHTSA. Confirms the year/make/model/engine the seller claims, and lists recall campaigns for that model. Run the VIN at <a href="https://www.nhtsa.gov/recalls" target="_blank" rel="noopener">nhtsa.gov/recalls</a> to see if a specific car's recall was fixed.</p>
+        <form id="vin-form" class="input-group mb-3" style="max-width:560px">
+          <input class="form-control text-uppercase" name="vin" maxlength="17" placeholder="17-character VIN" required>
+          <button class="btn btn-primary"><i class="fa-solid fa-magnifying-glass me-1"></i>Look up</button>
+        </form>
+        <div id="vin-result"></div>
+      </div>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 card-title">Check history (paid / free)</h2>
+        <div class="list-group list-group-flush">
+          <a class="list-group-item list-group-item-action" href="https://vehiclehistory.bja.ojp.gov/nmvtis_vehiclehistory" target="_blank" rel="noopener"><b>NMVTIS approved providers</b> <span class="text-body-secondary">— cheap title-brand check (salvage, flood, junk)</span></a>
+          <a class="list-group-item list-group-item-action" href="https://www.nicb.org/vincheck" target="_blank" rel="noopener"><b>NICB VINCheck</b> <span class="text-body-secondary">— free theft &amp; total-loss check</span></a>
+          <a class="list-group-item list-group-item-action" href="https://www.carfax.com" target="_blank" rel="noopener"><b>Carfax</b> <span class="text-body-secondary">— full history report</span></a>
+          <a class="list-group-item list-group-item-action" href="https://www.autocheck.com" target="_blank" rel="noopener"><b>AutoCheck</b> <span class="text-body-secondary">— full history report</span></a>
+          <a class="list-group-item list-group-item-action" href="https://www.bar.ca.gov/consumer/smog-check-program" target="_blank" rel="noopener"><b>CA BAR smog check history</b> <span class="text-body-secondary">— past smog results by VIN or plate</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COST -->
+  <section id="tab-cost" class="tab-pane fade" role="tabpanel">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h2 class="h5 card-title">True cost to buy in Ridgecrest</h2>
+            <form id="cost-form" class="row g-3">
+              <div class="col-6 col-md-4"><label class="form-label">Vehicle price ($)</label><input class="form-control" name="price" type="number" value="25000" step="100"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Seller type</label><select class="form-select" name="sellerType"><option value="dealer">Dealer</option><option value="private">Private party</option></select></div>
+              <div class="col-6 col-md-4"><label class="form-label">Sales/use tax (%)</label><input class="form-control" name="taxRate" type="number" value="9.25" step="0.01"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Dealer doc fee ($)</label><input class="form-control" name="docFee" type="number" value="85"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Dealer e-filing &amp; misc ($)</label><input class="form-control" name="dealerMisc" type="number" value="40"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Trade-in value ($)</label><input class="form-control" name="tradeIn" type="number" value="0" step="100"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Owed on trade-in ($)</label><input class="form-control" name="tradeOwed" type="number" value="0" step="100"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Down payment ($)</label><input class="form-control" name="down" type="number" value="5000" step="100"></div>
+              <div class="col-6 col-md-4"><label class="form-label">APR (%)</label><input class="form-control" name="apr" type="number" value="7.5" step="0.1"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Term (months)</label><select class="form-select" name="term"><option>36</option><option>48</option><option selected>60</option><option>72</option><option>84</option></select></div>
+              <div class="col-6 col-md-4"><label class="form-label">Pre-purchase inspection ($)</label><input class="form-control" name="ppi" type="number" value="150"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Max out-the-door ($)</label><input class="form-control" name="budget" type="number" step="500" placeholder="not set"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Miles driven per month</label><input class="form-control" name="milesMonth" type="number" value="1000" step="100"></div>
+              <div class="col-6 col-md-4"><label class="form-label">Gas price ($/gal)</label><input class="form-control" name="gasPrice" type="number" value="4.75" step="0.05"></div>
+              <div class="col-12 col-md-4 d-flex align-items-end"><div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" role="switch" name="dmv" id="cost-dmv" checked>
+                <label class="form-check-label" for="cost-dmv">Include DMV fee estimate</label></div></div>
+            </form>
+            <div class="form-text mt-3">9.25% is the Ridgecrest city rate. If you live in unincorporated Kern County, use tax is lower — check <a href="https://maps.cdtfa.ca.gov/" target="_blank" rel="noopener">CDTFA's rate lookup</a>. Tax is charged on where the car is <em>registered</em>, not where you buy it.</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5"><div class="card shadow-sm h-100"><div class="card-body" id="cost-out"></div></div></div>
+    </div>
+  </section>
+
+  <!-- GUIDE -->
+  <section id="tab-guide" class="tab-pane fade" role="tabpanel">
+    <div id="guide" class="row row-cols-1 row-cols-lg-2 g-3"></div>
+  </section>
+</main>
+
+<!-- Car editor modal -->
+<div class="modal fade" id="car-modal" tabindex="-1" aria-labelledby="car-dialog-title" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <form id="car-form" class="modal-content" novalidate>
+      <div class="modal-header">
+        <h2 class="modal-title h5" id="car-dialog-title">Add a car</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-8"><label class="form-label">Listing title</label><input class="form-control" name="title" placeholder="2018 Toyota Tacoma TRD Off-Road"></div>
+          <div class="col-md-4"><label class="form-label">Source</label><select class="form-select" name="source" id="car-source"></select></div>
+          <div class="col-4 col-md-2"><label class="form-label">Year</label><input class="form-control" name="year" type="number"></div>
+          <div class="col-4 col-md-2"><label class="form-label">Make</label><input class="form-control" name="make" list="makes"></div>
+          <div class="col-4 col-md-2"><label class="form-label">Model</label><input class="form-control" name="model"></div>
+          <div class="col-4 col-md-2"><label class="form-label">Trim</label><input class="form-control" name="trim"></div>
+          <div class="col-4 col-md-2"><label class="form-label">Price ($)</label><input class="form-control" name="price" type="number" step="100"></div>
+          <div class="col-4 col-md-2"><label class="form-label">Mileage</label><input class="form-control" name="mileage" type="number" step="100"></div>
+          <div class="col-md-5"><label class="form-label">VIN</label><input class="form-control text-uppercase" name="vin" maxlength="17"></div>
+          <div class="col-md-7"><label class="form-label">Listing URL</label><input class="form-control" name="url" type="url" placeholder="https://"></div>
+          <div class="col-6 col-md-3"><label class="form-label">Seller</label><input class="form-control" name="seller"></div>
+          <div class="col-6 col-md-3"><label class="form-label">Seller type</label><select class="form-select" name="seller_type"><option value="dealer">Dealer</option><option value="private">Private</option></select></div>
+          <div class="col-6 col-md-3"><label class="form-label">Phone</label><input class="form-control" name="phone"></div>
+          <div class="col-6 col-md-3"><label class="form-label">Location</label><input class="form-control" name="location" placeholder="Ridgecrest"></div>
+          <div class="col-6 col-md-3"><label class="form-label">Status</label><select class="form-select" name="status"></select></div>
+          <div class="col-6 col-md-3"><label class="form-label">Rating</label>
+            <select class="form-select" name="rating"><option value="0">–</option><option value="1">★</option><option value="2">★★</option><option value="3">★★★</option><option value="4">★★★★</option><option value="5">★★★★★</option></select></div>
+          <div class="col-12"><label class="form-label">Notes</label><textarea class="form-control" name="notes" rows="3"></textarea></div>
+        </div>
+
+        <div class="accordion mt-4" id="car-sections">
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec-rel"><i class="fa-solid fa-shield-halved me-2"></i>Reliability</button></h3>
+            <div id="sec-rel" class="accordion-collapse collapse" data-bs-parent="#car-sections"><div class="accordion-body">
+              <div class="row g-3">
+                <div class="col-md-4"><label class="form-label">Rating</label>
+                  <select class="form-select" id="rel-score"><option value="0">Unknown</option><option value="1">1 · Poor</option><option value="2">2 · Below average</option><option value="3">3 · Average</option><option value="4">4 · Good</option><option value="5">5 · Excellent</option></select></div>
+                <div class="col-md-8"><label class="form-label">Summary</label><textarea class="form-control" id="rel-summary" rows="2"></textarea></div>
+                <div class="col-md-6"><label class="form-label">Known issues for this model <span class="text-body-secondary">(one per line)</span></label><textarea class="form-control" id="rel-issues" rows="4"></textarea></div>
+                <div class="col-md-6"><label class="form-label">What to check on this car <span class="text-body-secondary">(one per line)</span></label><textarea class="form-control" id="rel-checks" rows="4"></textarea></div>
+              </div>
+              <div id="rel-stats" class="mt-3"></div>
+            </div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec-budget"><i class="fa-solid fa-coins me-2"></i>Budget &amp; insurance</button></h3>
+            <div id="sec-budget" class="accordion-collapse collapse" data-bs-parent="#car-sections"><div class="accordion-body">
+              <div class="row g-3">
+                <div class="col-6 col-md-2"><label class="form-label">MPG combined</label><input class="form-control" id="bud-mpg" type="number" step="1" placeholder="25 if blank"></div>
+                <div class="col-6 col-md-2"><label class="form-label">MPG highway</label><input class="form-control" id="bud-mpg-hwy" type="number" step="1" placeholder="optional"></div>
+                <div class="col-6 col-md-2"><label class="form-label">MPG city</label><input class="form-control" id="bud-mpg-city" type="number" step="1" placeholder="from combined"></div>
+                <div class="col-6 col-md-3"><label class="form-label">Insurance quote ($/mo)</label><input class="form-control" id="bud-ins" type="number" step="1" placeholder="estimate if blank"></div>
+                <div class="col-md-3"><label class="form-label">Coverage if paying cash</label><select class="form-select" id="bud-cov"><option value="">Auto</option><option value="full">Full coverage</option><option value="liability">Liability only</option></select></div>
+              </div>
+              <div class="form-text">Used in the Details PDF. Loan, APR, budget, gas price and miles/month come from the Cost Calculator tab.</div>
+            </div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec-photos"><i class="fa-solid fa-images me-2"></i>Photos</button></h3>
+            <div id="sec-photos" class="accordion-collapse collapse" data-bs-parent="#car-sections"><div class="accordion-body">
+              <div id="photo-section">
+                <div id="photo-grid" class="row row-cols-3 row-cols-md-6 g-2 mb-3"></div>
+                <div class="input-group">
+                  <label class="btn btn-outline-primary mb-0"><i class="fa-solid fa-upload me-1"></i>Upload photos<input type="file" id="photo-files" accept="image/*" multiple hidden></label>
+                  <input id="photo-url" class="form-control" type="url" placeholder="…or paste an image URL">
+                  <button type="button" id="photo-url-add" class="btn btn-outline-secondary">Add</button>
+                </div>
+              </div>
+              <div id="photo-save-first" class="alert alert-secondary mb-0">Save the car first, then reopen it to add photos.</div>
+            </div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec-check"><i class="fa-solid fa-list-check me-2"></i>Vetting checklist</button></h3>
+            <div id="sec-check" class="accordion-collapse collapse" data-bs-parent="#car-sections"><div class="accordion-body">
+              <div id="checklist" class="row row-cols-1 row-cols-md-2 g-1"></div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="car-delete" class="btn btn-outline-danger me-auto"><i class="fa-solid fa-trash-can me-1"></i>Delete</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check me-1"></i>Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Photo viewer: Bootstrap carousel in a fullscreen modal, with thumbnails -->
+<div class="modal fade" id="photo-modal" tabindex="-1" aria-label="Photos" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content bg-black">
+      <div class="modal-header border-0 py-2">
+        <span class="badge text-bg-dark fs-6" id="photo-count"></span>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body d-flex flex-column p-0 overflow-hidden">
+        <div id="photo-carousel" class="carousel slide flex-grow-1 d-flex align-items-center" data-bs-touch="true">
+          <div class="carousel-inner h-100"></div>
+          <button class="carousel-control-prev photo-nav" type="button" data-bs-target="#photo-carousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span><span class="visually-hidden">Previous photo</span></button>
+          <button class="carousel-control-next photo-nav" type="button" data-bs-target="#photo-carousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span><span class="visually-hidden">Next photo</span></button>
+        </div>
+        <div id="photo-thumbs" class="d-flex gap-2 overflow-x-auto px-3 py-2 flex-shrink-0" role="tablist" aria-label="All photos"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PDF viewer: keeps PDFs inside the app (an installed app has no back button) -->
+<div class="modal fade" id="pdf-modal" tabindex="-1" aria-labelledby="pdf-title" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header py-2 gap-2">
+        <h2 class="modal-title h6 text-truncate me-auto" id="pdf-title">PDF</h2>
+        <div class="spinner-border spinner-border-sm text-primary d-none" id="pdf-spinner" role="status"><span class="visually-hidden">Loading</span></div>
+        <a class="btn btn-sm btn-outline-primary" id="pdf-download" download><i class="fa-solid fa-download me-1"></i>Download</a>
+        <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal"><i class="fa-solid fa-xmark me-1"></i>Close</button>
+      </div>
+      <div class="modal-body p-0 bg-body-secondary">
+        <iframe id="pdf-frame" class="w-100 h-100 border-0 d-block" title="PDF document"></iframe>
+        <div id="pdf-fallback" class="d-none h-100 flex-column align-items-center justify-content-center text-center p-4">
+          <i class="fa-solid fa-file-pdf display-3 text-primary mb-3"></i>
+          <p class="mb-3" id="pdf-fallback-text">This device can't show PDFs inside the app.</p>
+          <a class="btn btn-primary" id="pdf-fallback-download" download><i class="fa-solid fa-download me-1"></i>Download the PDF</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal (replaces window.confirm) -->
+<div class="modal fade" id="confirm-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body" id="confirm-text"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-ok">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit PIN (the server refuses changes without it) -->
+<div class="modal fade" id="pin-modal" tabindex="-1" aria-labelledby="pin-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <form class="modal-content" id="pin-form" autocomplete="off">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="pin-title"><i class="fa-solid fa-shield-halved me-2"></i>Enter edit PIN</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-body-secondary">Viewing is open; saving changes needs the PIN.</p>
+        <input type="password" class="form-control form-control-lg text-center" id="pin-input" name="pin"
+               inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="off" aria-label="Edit PIN" required>
+        <div class="invalid-feedback d-block" id="pin-error" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="pin-ok"><i class="fa-solid fa-lock-open me-1"></i>Unlock</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Offline status, install and "save for offline" controls -->
+<div id="pwa-bar" class="position-fixed bottom-0 start-0 p-3 d-flex gap-2 align-items-center">
+  <span id="offline-badge" class="badge text-bg-warning shadow d-none"><i class="fa-solid fa-plug-circle-xmark me-1"></i>Offline — showing saved data</span>
+  <button type="button" id="edit-lock" class="btn btn-sm btn-light border shadow-sm" title="Editing needs the PIN">
+    <i class="fa-solid fa-lock me-1"></i><span>Locked</span></button>
+  <button type="button" id="save-offline" class="btn btn-sm btn-light border shadow-sm" title="Save every car, photo, budget and PDF so the app works without internet">
+    <i class="fa-solid fa-cloud-arrow-down me-1"></i><span>Save for offline</span></button>
+  <button type="button" id="install-app" class="btn btn-sm btn-primary shadow-sm d-none"><i class="fa-solid fa-download me-1"></i>Install app</button>
+</div>
+
+<!-- Toasts (replace alert()) -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toasts"></div>
+
+<footer class="app-footer text-center small py-4">
+  <!-- Canyon rim: the page's sand drops away into the night road -->
+  <svg class="footer-rim" viewBox="0 0 1440 56" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <path d="M0 0 H1440 V18 L1380 22 L1352 40 L1270 40 L1250 26 L1120 24 L1040 30 L1000 46 L900 46 L880 30 L760 26
+      L640 32 L600 44 L520 44 L500 28 L380 24 L300 30 L270 48 L170 48 L150 30 L60 26 L0 30 Z"/>
+  </svg>
+  <div class="container-xl">
+    <div class="mb-1"><i class="fa-solid fa-route me-1"></i>Drive safe out there.</div>
+    Listings last checked November 3, 2026 · VIN &amp; recall data from NHTSA · Estimates only
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="static/snapshot-shim.js?v=20261103190452"></script>
+<script src="static/app.js?v=20261103190452"></script>
+</body>
+</html>
